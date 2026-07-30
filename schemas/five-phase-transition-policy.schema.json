@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.2.0/five-phase-transition-policy.schema.json",
+  "title": "Five-Phase Transition Policy",
+  "description": "Defines canonical generating and controlling relations, explicit transition restrictions, and cooldown rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "policy_version",
+    "issued_at",
+    "generating_cycle",
+    "controlling_cycle",
+    "blocked_transitions",
+    "human_review_transitions",
+    "cooldown_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "policy_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "policy_version": {
+      "const": "0.2.0"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generating_cycle": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/phaseEdge"
+      }
+    },
+    "controlling_cycle": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/phaseEdge"
+      }
+    },
+    "blocked_transitions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/restrictedEdge"
+      }
+    },
+    "human_review_transitions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/restrictedEdge"
+      }
+    },
+    "cooldown_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generating_default_seconds",
+        "controlling_default_seconds",
+        "emergency_bypass_allowed"
+      ],
+      "properties": {
+        "generating_default_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "controlling_default_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "emergency_bypass_allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "authority_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "phaseEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_phase",
+        "target_phase"
+      ],
+      "properties": {
+        "source_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "target_phase": {
+          "$ref": "#/$defs/phase"
+        }
+      }
+    },
+    "restrictedEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_phase",
+        "target_phase",
+        "reason"
+      ],
+      "properties": {
+        "source_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "target_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
