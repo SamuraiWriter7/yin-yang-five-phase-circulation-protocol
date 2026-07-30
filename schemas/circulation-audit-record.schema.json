@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.5.0/circulation-audit-record.schema.json",
+  "title": "Circulation Audit Record",
+  "description": "Audits a bound circulation execution before royalty settlement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audit_id",
+    "profile_ref",
+    "binding_ref",
+    "execution_evidence_ref",
+    "auditor_ref",
+    "checks",
+    "decision",
+    "unresolved_findings",
+    "audited_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "audit_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "profile_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "binding_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "execution_evidence_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "auditor_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin_resolved",
+        "trace_resolved",
+        "authorization_match",
+        "execution_consistent",
+        "phase_policy_conformant",
+        "royalty_eligible"
+      ],
+      "properties": {
+        "origin_resolved": {
+          "type": "boolean"
+        },
+        "trace_resolved": {
+          "type": "boolean"
+        },
+        "authorization_match": {
+          "type": "boolean"
+        },
+        "execution_consistent": {
+          "type": "boolean"
+        },
+        "phase_policy_conformant": {
+          "type": "boolean"
+        },
+        "royalty_eligible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "decision": {
+      "enum": [
+        "pass",
+        "fail",
+        "human_review_required"
+      ]
+    },
+    "unresolved_findings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "severity",
+          "description"
+        ],
+        "properties": {
+          "finding_id": {
+            "$ref": "#/$defs/identifier"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    },
+    "audited_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  }
+}
