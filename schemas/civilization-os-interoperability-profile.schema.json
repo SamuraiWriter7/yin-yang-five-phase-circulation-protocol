@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.5.0/civilization-os-interoperability-profile.schema.json",
+  "title": "Civilization OS Interoperability Profile",
+  "description": "Declares the cross-protocol stages and ordering required to bind circulation operations to Civilization OS provenance, authorization, execution, audit, and royalty records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "profile_version",
+    "issued_at",
+    "local_protocol",
+    "required_stages",
+    "stage_bindings",
+    "sequence_constraints",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "profile_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "profile_version": {
+      "const": "0.5.0"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "local_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_id",
+        "version"
+      ],
+      "properties": {
+        "protocol_id": {
+          "const": "yin-yang-five-phase-circulation-protocol"
+        },
+        "version": {
+          "const": "0.5.0"
+        }
+      }
+    },
+    "required_stages": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stage"
+      }
+    },
+    "stage_bindings": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/stageBinding"
+      }
+    },
+    "sequence_constraints": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/sequenceConstraint"
+      }
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "retired"
+      ]
+    },
+    "policy_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "stage": {
+      "enum": [
+        "origin",
+        "trace",
+        "authorization",
+        "execution",
+        "audit",
+        "royalty"
+      ]
+    },
+    "stageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "protocol_id",
+        "record_type",
+        "minimum_version"
+      ],
+      "properties": {
+        "stage": {
+          "$ref": "#/$defs/stage"
+        },
+        "protocol_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "record_type": {
+          "$ref": "#/$defs/identifier"
+        },
+        "minimum_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "sequenceConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predecessor",
+        "successor",
+        "relation"
+      ],
+      "properties": {
+        "predecessor": {
+          "$ref": "#/$defs/stage"
+        },
+        "successor": {
+          "$ref": "#/$defs/stage"
+        },
+        "relation": {
+          "const": "must_precede"
+        }
+      }
+    }
+  }
+}
