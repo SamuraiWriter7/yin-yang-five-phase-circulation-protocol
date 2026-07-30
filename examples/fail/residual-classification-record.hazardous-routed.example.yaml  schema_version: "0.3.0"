@@ -1,0 +1,13 @@
+classification_id: residual-classification-hazardous-invalid-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-info-hazardous-001
+classification: hazardous
+confidence: 0.97
+classifier_ref: agent:residual-classifier-001
+reason_codes:
+  - integrity_risk
+candidate_target_phases:
+  - wood
+quarantine_ref: quarantine:payload-set-001
+sanitization_required: true
+classified_at: "2026-07-30T10:33:00+09:00"
