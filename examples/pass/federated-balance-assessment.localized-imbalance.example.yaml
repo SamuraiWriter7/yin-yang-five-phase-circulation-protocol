@@ -1,0 +1,44 @@
+schema_version: 0.4.0
+assessment_id: federated-balance-assessment-001
+federation_id: federation-kazene-001
+epoch_id: federation-epoch-20260730-01
+assessed_at: '2026-07-30T10:25:00+09:00'
+member_states:
+- member_id: member-east-001
+  region: jp-east
+  state_record_ref: five-phase-state-fire-overheated-001
+  balance_index: 1.47619
+  risk_level: 0.94
+  available_export_capacity: 0.05
+  unmet_demand: 0.35
+  trust_factor: 0.98
+- member_id: member-west-001
+  region: jp-west
+  state_record_ref: five-phase-state-balanced-001
+  balance_index: 0.923077
+  risk_level: 0.32
+  available_export_capacity: 0.8
+  unmet_demand: 0.0
+  trust_factor: 0.97
+federation_totals:
+  available_export_capacity: 0.85
+  unmet_demand: 0.35
+  net_capacity: 0.5
+  maximum_member_risk: 0.94
+imbalances:
+- member_id: member-east-001
+  severity: critical
+  required_resources:
+  - resource_type: compute_capacity
+    amount: 0.3
+    unit: normalized_capacity
+    target_phase: fire
+  - resource_type: cooling_capacity
+    amount: 0.05
+    unit: normalized_capacity
+    target_phase: water
+  reason: Fire risk and unmet demand exceed local safe capacity.
+overall_status: localized_imbalance
+policy_ref: policy:federated-rebalancing:v0.4
+evidence_refs:
+- trace:federation-epoch-20260730-01
