@@ -1,0 +1,35 @@
+schema_version: 0.4.0
+receipt_id: federated-rebalancing-receipt-001
+federation_id: federation-kazene-001
+epoch_id: federation-epoch-20260730-01
+plan_ref: federated-rebalancing-plan-001
+delegation_ref: governor-delegation-regional-001
+conflict_resolution_refs:
+- rebalancing-conflict-resolution-001
+emergency: true
+authorization:
+  decision: authorized
+  authorized_by: agent:regional-circulation-governor-001
+  decided_at: '2026-07-30T10:26:40+09:00'
+  authorization_ref: authorization:federated-rebalance-001
+started_at: '2026-07-30T10:26:45+09:00'
+completed_at: '2026-07-30T10:28:00+09:00'
+executed_transfers:
+- transfer_ref: transfer-compute-primary-001
+  executed_amount: 0.35
+  unit: normalized_capacity
+  status: completed
+  evidence_refs:
+  - trace:compute-transfer-001
+- transfer_ref: transfer-cooling-001
+  executed_amount: 0.05
+  unit: normalized_capacity
+  status: completed
+  evidence_refs:
+  - trace:cooling-transfer-001
+result:
+  status: completed
+  remaining_unmet_demand: 0.0
+  maximum_member_risk: 0.75
+  evidence_refs:
+  - trace:federated-rebalance-result-001
