@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.4.0/federated-rebalancing-plan.schema.json",
+  "title": "Federated Rebalancing Plan",
+  "description": "Proposes scoped cross-member resource transfers, alternatives, and expected post-rebalancing state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "federation_id",
+    "epoch_id",
+    "assessment_ref",
+    "delegation_ref",
+    "governor_ref",
+    "created_at",
+    "emergency",
+    "transfer_candidates",
+    "conflict_groups",
+    "expected_post_balance",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0"
+    },
+    "plan_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "federation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "epoch_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "assessment_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "delegation_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "governor_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "created_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "emergency": {
+      "type": "boolean"
+    },
+    "emergency_reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "transfer_candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/transferCandidate"
+      }
+    },
+    "conflict_groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflictGroup"
+      }
+    },
+    "expected_post_balance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall_status",
+        "remaining_unmet_demand",
+        "maximum_member_risk"
+      ],
+      "properties": {
+        "overall_status": {
+          "enum": [
+            "balanced",
+            "localized_imbalance",
+            "federation_unstable"
+          ]
+        },
+        "remaining_unmet_demand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximum_member_risk": {
+          "$ref": "#/$defs/ratio"
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "ready_for_resolution",
+        "blocked",
+        "cancelled"
+      ]
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "transferCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transfer_id",
+        "source_member_id",
+        "target_member_id",
+        "resource_type",
+        "amount",
+        "unit",
+        "source_phase",
+        "target_phase",
+        "relation_type",
+        "priority",
+        "route_ref"
+      ],
+      "properties": {
+        "transfer_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "source_member_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "target_member_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "resource_type": {
+          "enum": [
+            "compute_capacity",
+            "cooling_capacity",
+            "storage_capacity",
+            "bandwidth",
+            "liquidity",
+            "workload"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "source_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "target_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "relation_type": {
+          "enum": [
+            "federated_support",
+            "generating",
+            "controlling"
+          ]
+        },
+        "priority": {
+          "enum": [
+            "normal",
+            "high",
+            "critical"
+          ]
+        },
+        "route_ref": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "conflictGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conflict_group_id",
+        "transfer_ids",
+        "reason"
+      ],
+      "properties": {
+        "conflict_group_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "transfer_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
