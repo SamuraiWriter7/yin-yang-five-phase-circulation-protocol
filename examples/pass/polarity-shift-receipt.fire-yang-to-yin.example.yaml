@@ -1,0 +1,52 @@
+schema_version: "0.1.0"
+shift_id: polarity-shift-fire-001
+cycle_id: circulation-cycle-002
+state_record_ref: five-phase-state-fire-overheated-001
+assessment_ref: yin-yang-assessment-fire-overheat-001
+
+phase: fire
+previous_polarity: yang
+new_polarity: yin
+reason_code: overheat
+
+triggers:
+  - metric: compute_utilization
+    observed_value: 0.94
+    comparator: gte
+    threshold: 0.90
+    unit: ratio
+
+  - metric: phase_risk_level
+    observed_value: 0.94
+    comparator: gte
+    threshold: 0.90
+    unit: ratio
+
+actions:
+  - action_type: reduce_load
+    target_ref: workload-class:low-priority-inference
+
+  - action_type: route_workload
+    target_ref: node-pool:cooler-edge-nodes
+
+  - action_type: activate_cooling
+    target_ref: cooling-loop:regional-002
+
+  - action_type: activate_recovery
+    target_ref: residual-route:heat-recovery-002
+
+authorization:
+  decision: authorized
+  policy_ref: policy:five-phase-balance:v0.1
+  authorized_by: agent:circulation-governor-001
+  decided_at: "2026-07-30T10:07:00+09:00"
+
+requested_at: "2026-07-30T10:06:30+09:00"
+effective_at: "2026-07-30T10:07:10+09:00"
+
+result:
+  status: stabilized
+  observed_balance_index: 1.08
+  evidence_refs:
+    - trace:cycle-002:post-shift-window-001
+    - residual:heat-recovery-002
