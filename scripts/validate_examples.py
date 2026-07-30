@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Yin-Yang Five-Phase Circulation Protocol v0.3 examples."""
+"""Validate Yin-Yang Five-Phase Circulation Protocol v0.4 examples."""
 
 from __future__ import annotations
 
@@ -55,6 +55,21 @@ SCHEMA_FILES = {
     ),
     "regenerated-value-attribution": (
         SCHEMA_DIR / "regenerated-value-attribution.schema.json"
+    ),
+    "circulation-governor-delegation": (
+        SCHEMA_DIR / "circulation-governor-delegation.schema.json"
+    ),
+    "federated-balance-assessment": (
+        SCHEMA_DIR / "federated-balance-assessment.schema.json"
+    ),
+    "federated-rebalancing-plan": (
+        SCHEMA_DIR / "federated-rebalancing-plan.schema.json"
+    ),
+    "rebalancing-conflict-resolution": (
+        SCHEMA_DIR / "rebalancing-conflict-resolution.schema.json"
+    ),
+    "federated-rebalancing-receipt": (
+        SCHEMA_DIR / "federated-rebalancing-receipt.schema.json"
     ),
 }
 
@@ -931,6 +946,371 @@ def validate_regenerated_value_attribution(
 
     registry[data["attribution_id"]] = data
 
+
+
+def validate_governor_delegation(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    valid_from = parse_dt(data["valid_from"])
+    valid_until = parse_dt(data["valid_until"])
+    issued_at = parse_dt(data["issued_at"])
+
+    if valid_until <= valid_from:
+        raise SemanticError("valid_until must be later than valid_from")
+
+    if data["status"] == "active" and not (
+        valid_from <= issued_at <= valid_until
+    ):
+        raise SemanticError(
+            "active delegation issued_at must fall within its validity window"
+        )
+
+    scope = data["authority_scope"]
+    if scope["emergency_authority"] and (
+        "emergency_rebalance" not in scope["allowed_actions"]
+    ):
+        raise SemanticError(
+            "emergency authority requires emergency_rebalance action"
+        )
+
+    registry[data["delegation_id"]] = data
+
+
+def validate_federated_balance_assessment(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    members = data["member_states"]
+    member_ids = [item["member_id"] for item in members]
+
+    if len(member_ids) != len(set(member_ids)):
+        raise SemanticError("member_states must use unique member_id values")
+
+    for member in members:
+        state = resolve_record(
+            registry,
+            member["state_record_ref"],
+            "state_record_ref",
+        )
+        require_close(
+            float(member["balance_index"]),
+            float(state["aggregate"]["balance_index"]),
+            f"member {member['member_id']} balance_index",
+        )
+        maximum_risk = max(
+            float(item["risk_level"])
+            for item in state["phase_states"]
+        )
+        require_close(
+            float(member["risk_level"]),
+            maximum_risk,
+            f"member {member['member_id']} risk_level",
+        )
+
+    total_export = sum(
+        float(item["available_export_capacity"])
+        for item in members
+    )
+    total_unmet = sum(float(item["unmet_demand"]) for item in members)
+    maximum_risk = max(float(item["risk_level"]) for item in members)
+    totals = data["federation_totals"]
+
+    require_close(
+        float(totals["available_export_capacity"]),
+        total_export,
+        "federation_totals.available_export_capacity",
+    )
+    require_close(
+        float(totals["unmet_demand"]),
+        total_unmet,
+        "federation_totals.unmet_demand",
+    )
+    require_close(
+        float(totals["net_capacity"]),
+        total_export - total_unmet,
+        "federation_totals.net_capacity",
+    )
+    require_close(
+        float(totals["maximum_member_risk"]),
+        maximum_risk,
+        "federation_totals.maximum_member_risk",
+    )
+
+    imbalance_members = {item["member_id"] for item in data["imbalances"]}
+    unknown_members = imbalance_members - set(member_ids)
+    if unknown_members:
+        raise SemanticError(
+            f"imbalances reference unknown members: {sorted(unknown_members)}"
+        )
+
+    if maximum_risk >= 0.98 or total_export + EPSILON < total_unmet:
+        expected = "federation_unstable"
+    elif maximum_risk >= 0.90 or total_unmet > EPSILON:
+        expected = "localized_imbalance"
+    else:
+        expected = "balanced"
+
+    if data["overall_status"] != expected:
+        raise SemanticError(f"overall_status must be '{expected}'")
+
+    registry[data["assessment_id"]] = data
+
+
+def validate_federated_rebalancing_plan(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    assessment = resolve_record(
+        registry, data["assessment_ref"], "assessment_ref"
+    )
+    delegation = resolve_record(
+        registry, data["delegation_ref"], "delegation_ref"
+    )
+
+    if assessment["federation_id"] != data["federation_id"]:
+        raise SemanticError("federation_id must match assessment_ref")
+    if delegation["federation_id"] != data["federation_id"]:
+        raise SemanticError("federation_id must match delegation_ref")
+    if assessment["epoch_id"] != data["epoch_id"]:
+        raise SemanticError("epoch_id must match assessment_ref")
+    if delegation["governor_ref"] != data["governor_ref"]:
+        raise SemanticError("governor_ref must match delegated governor")
+    if delegation["status"] != "active":
+        raise SemanticError("rebalancing plan requires an active delegation")
+
+    created_at = parse_dt(data["created_at"])
+    if not (
+        parse_dt(delegation["valid_from"])
+        <= created_at
+        <= parse_dt(delegation["valid_until"])
+    ):
+        raise SemanticError(
+            "created_at must fall within the delegation validity window"
+        )
+
+    scope = delegation["authority_scope"]
+    required_action = (
+        "emergency_rebalance" if data["emergency"] else "propose_rebalance"
+    )
+    if required_action not in scope["allowed_actions"]:
+        raise SemanticError(
+            f"delegation does not allow {required_action}"
+        )
+    if data["emergency"]:
+        if not scope["emergency_authority"]:
+            raise SemanticError("emergency plan requires emergency authority")
+        if "emergency_reason" not in data:
+            raise SemanticError("emergency plan requires emergency_reason")
+
+    members = {
+        item["member_id"]: item for item in assessment["member_states"]
+    }
+    transfer_ids = [item["transfer_id"] for item in data["transfer_candidates"]]
+    if len(transfer_ids) != len(set(transfer_ids)):
+        raise SemanticError("transfer_candidates must use unique transfer_id values")
+
+    totals_by_source: dict[str, float] = {}
+    for transfer in data["transfer_candidates"]:
+        source_id = transfer["source_member_id"]
+        target_id = transfer["target_member_id"]
+        if source_id == target_id:
+            raise SemanticError("source_member_id and target_member_id must differ")
+        if source_id not in members or target_id not in members:
+            raise SemanticError("transfer candidate references an unknown member")
+
+        source = members[source_id]
+        target = members[target_id]
+        if source["region"] not in scope["regions"] or target["region"] not in scope["regions"]:
+            raise SemanticError("transfer candidate is outside delegated regions")
+        scoped_members = set(scope.get("members", []))
+        if scoped_members and (
+            source_id not in scoped_members or target_id not in scoped_members
+        ):
+            raise SemanticError("transfer candidate is outside delegated members")
+        if (
+            transfer["source_phase"] not in scope["phases"]
+            or transfer["target_phase"] not in scope["phases"]
+        ):
+            raise SemanticError("transfer candidate is outside delegated phases")
+
+        totals_by_source[source_id] = totals_by_source.get(source_id, 0.0) + float(
+            transfer["amount"]
+        )
+
+    for source_id, amount in totals_by_source.items():
+        allowed = (
+            float(members[source_id]["available_export_capacity"])
+            * float(scope["maximum_transfer_ratio"])
+        )
+        if amount - allowed > EPSILON:
+            raise SemanticError(
+                f"planned transfers from {source_id} exceed delegated capacity ratio"
+            )
+
+    known_transfers = set(transfer_ids)
+    conflict_ids: list[str] = []
+    for group in data["conflict_groups"]:
+        conflict_ids.append(group["conflict_group_id"])
+        unknown = set(group["transfer_ids"]) - known_transfers
+        if unknown:
+            raise SemanticError(
+                f"conflict group references unknown transfers: {sorted(unknown)}"
+            )
+    if len(conflict_ids) != len(set(conflict_ids)):
+        raise SemanticError("conflict_groups must use unique conflict_group_id values")
+
+    expected_status = (
+        "ready_for_resolution" if data["conflict_groups"] else "ready"
+    )
+    if data["status"] != expected_status:
+        raise SemanticError(f"status must be '{expected_status}'")
+
+    registry[data["plan_id"]] = data
+
+
+def validate_rebalancing_conflict_resolution(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    plan = resolve_record(registry, data["plan_ref"], "plan_ref")
+    delegation = resolve_record(
+        registry, data["delegation_ref"], "delegation_ref"
+    )
+
+    if plan["federation_id"] != data["federation_id"]:
+        raise SemanticError("federation_id must match plan_ref")
+    if delegation["federation_id"] != data["federation_id"]:
+        raise SemanticError("federation_id must match delegation_ref")
+    if "resolve_conflict" not in delegation["authority_scope"]["allowed_actions"]:
+        raise SemanticError("delegation does not allow conflict resolution")
+
+    group = next(
+        (
+            item for item in plan["conflict_groups"]
+            if item["conflict_group_id"] == data["conflict_group_id"]
+        ),
+        None,
+    )
+    if group is None:
+        raise SemanticError("conflict_group_id does not resolve in plan")
+
+    competing = set(data["competing_transfer_refs"])
+    if competing != set(group["transfer_ids"]):
+        raise SemanticError(
+            "competing_transfer_refs must match the plan conflict group"
+        )
+
+    selected = set(data["selected_transfer_refs"])
+    rejected = set(data["rejected_transfer_refs"])
+    if selected & rejected:
+        raise SemanticError(
+            "selected and rejected transfer references must be disjoint"
+        )
+    if selected | rejected != competing:
+        raise SemanticError(
+            "selected and rejected transfers must partition competing transfers"
+        )
+
+    if data["decision"] == "resolved" and not selected:
+        raise SemanticError("resolved conflict requires a selected transfer")
+
+    registry[data["resolution_id"]] = data
+
+
+def validate_federated_rebalancing_receipt(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    plan = resolve_record(registry, data["plan_ref"], "plan_ref")
+    delegation = resolve_record(
+        registry, data["delegation_ref"], "delegation_ref"
+    )
+
+    for field in ("federation_id", "epoch_id", "delegation_ref", "emergency"):
+        if data[field] != plan[field]:
+            raise SemanticError(f"{field} must match the referenced plan")
+
+    if delegation["federation_id"] != data["federation_id"]:
+        raise SemanticError("delegation federation_id must match receipt")
+
+    resolutions = [
+        resolve_record(registry, ref, "conflict_resolution_ref")
+        for ref in data["conflict_resolution_refs"]
+    ]
+    if any(item["plan_ref"] != data["plan_ref"] for item in resolutions):
+        raise SemanticError("all conflict resolutions must reference the same plan")
+
+    resolution_by_group = {
+        item["conflict_group_id"]: item for item in resolutions
+    }
+    plan_groups = {
+        item["conflict_group_id"]: item for item in plan["conflict_groups"]
+    }
+    if set(resolution_by_group) != set(plan_groups):
+        raise SemanticError(
+            "receipt must resolve every conflict group exactly once"
+        )
+
+    rejected: set[str] = set()
+    selected: set[str] = set()
+    for resolution in resolutions:
+        if resolution["decision"] != "resolved":
+            raise SemanticError("receipt requires resolved conflicts")
+        rejected.update(resolution["rejected_transfer_refs"])
+        selected.update(resolution["selected_transfer_refs"])
+
+    conflict_members = {
+        transfer_id
+        for group in plan["conflict_groups"]
+        for transfer_id in group["transfer_ids"]
+    }
+    all_candidates = {
+        item["transfer_id"]: item for item in plan["transfer_candidates"]
+    }
+    approved = (set(all_candidates) - conflict_members) | selected
+
+    executed = data["executed_transfers"]
+    executed_ids = [item["transfer_ref"] for item in executed]
+    if len(executed_ids) != len(set(executed_ids)):
+        raise SemanticError("executed_transfers must use unique transfer_ref values")
+    if set(executed_ids) & rejected:
+        raise SemanticError("receipt cannot execute a rejected transfer")
+    if not set(executed_ids) <= approved:
+        raise SemanticError("receipt executes an unapproved transfer")
+
+    for item in executed:
+        planned = all_candidates[item["transfer_ref"]]
+        if item["unit"] != planned["unit"]:
+            raise SemanticError("executed transfer unit must match the plan")
+        if float(item["executed_amount"]) - float(planned["amount"]) > EPSILON:
+            raise SemanticError("executed_amount cannot exceed planned amount")
+
+    status = data["result"]["status"]
+    if status in {"applied", "completed", "partial"}:
+        if data["authorization"]["decision"] != "authorized":
+            raise SemanticError(
+                "applied, completed, or partial receipt requires authorization"
+            )
+    if status == "completed":
+        if set(executed_ids) != approved:
+            raise SemanticError(
+                "completed receipt must execute every approved transfer"
+            )
+        if "completed_at" not in data:
+            raise SemanticError("completed receipt requires completed_at")
+
+    if data["emergency"]:
+        scope = delegation["authority_scope"]
+        if not scope["emergency_authority"]:
+            raise SemanticError("emergency receipt requires emergency authority")
+        if "emergency_rebalance" not in scope["allowed_actions"]:
+            raise SemanticError(
+                "emergency receipt requires emergency_rebalance action"
+            )
+
+    registry[data["receipt_id"]] = data
+
 SEMANTIC_VALIDATORS: dict[
     str,
     Callable[[dict[str, Any], dict[str, dict[str, Any]]], None],
@@ -947,6 +1327,15 @@ SEMANTIC_VALIDATORS: dict[
     "residual-transformation-receipt": validate_residual_transformation,
     "regenerated-value-attribution": (
         validate_regenerated_value_attribution
+    ),
+    "circulation-governor-delegation": validate_governor_delegation,
+    "federated-balance-assessment": validate_federated_balance_assessment,
+    "federated-rebalancing-plan": validate_federated_rebalancing_plan,
+    "rebalancing-conflict-resolution": (
+        validate_rebalancing_conflict_resolution
+    ),
+    "federated-rebalancing-receipt": (
+        validate_federated_rebalancing_receipt
     ),
 }
 
@@ -1018,7 +1407,7 @@ def validate_fail_examples(
 
 
 def main() -> int:
-    print("=== Yin-Yang Five-Phase Circulation Protocol v0.3 Validation ===")
+    print("=== Yin-Yang Five-Phase Circulation Protocol v0.4 Validation ===")
     validators: dict[str, Draft202012Validator] = {}
     for kind, schema_path in SCHEMA_FILES.items():
         schema = load_schema(schema_path)
