@@ -1,0 +1,11 @@
+schema_version: "0.3.0"
+classification_id: residual-classification-dormant-invalid-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-info-dormant-001
+classification: dormant
+confidence: 0.78
+classifier_ref: agent:residual-classifier-001
+reason_codes:
+  - insufficient_current_use
+vault_ref: vault:restricted-trace-001
+classified_at: "2026-07-30T10:32:00+09:00"
