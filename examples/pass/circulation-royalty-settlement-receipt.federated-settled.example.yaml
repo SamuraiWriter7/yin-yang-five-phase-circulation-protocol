@@ -1,0 +1,29 @@
+schema_version: 0.5.0
+settlement_id: circulation-royalty-settlement-federated-001
+profile_ref: civilization-os-interoperability-profile-canonical-001
+binding_ref: circulation-operation-binding-federated-001
+audit_ref: circulation-audit-federated-001
+context:
+  context_type: federation_epoch
+  context_id: federation-epoch-20260730-01
+settlement_status: settled
+value:
+  gross_amount: 100.0
+  unit: normalized-value
+allocations:
+- beneficiary_ref: origin:federation-emergency-rebalance-001
+  role: originator
+  share_ratio: 0.4
+  amount: 40.0
+- beneficiary_ref: member:west-infrastructure-001
+  role: infrastructure
+  share_ratio: 0.45
+  amount: 45.0
+- beneficiary_ref: fund:federation-resilience-001
+  role: community_fund
+  share_ratio: 0.15
+  amount: 15.0
+unresolved_dispute_refs: []
+ledger_ref: ledger:federated-rebalance-royalty-001
+settled_at: '2026-07-30T13:40:00+09:00'
+recorded_at: '2026-07-30T13:40:05+09:00'
