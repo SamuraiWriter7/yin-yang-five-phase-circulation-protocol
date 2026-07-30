@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.4.0/circulation-governor-delegation.schema.json",
+  "title": "Circulation Governor Delegation",
+  "description": "Delegates bounded federated rebalancing authority across regions, members, phases, and emergency conditions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "delegation_id",
+    "federation_id",
+    "governor_ref",
+    "authority_scope",
+    "valid_from",
+    "valid_until",
+    "status",
+    "issued_by",
+    "issued_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0"
+    },
+    "delegation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "federation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "governor_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "authority_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regions",
+        "phases",
+        "allowed_actions",
+        "maximum_transfer_ratio",
+        "emergency_authority"
+      ],
+      "properties": {
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "members": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "phases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/phase"
+          }
+        },
+        "allowed_actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "assess_federation",
+              "propose_rebalance",
+              "authorize_rebalance",
+              "resolve_conflict",
+              "emergency_rebalance",
+              "revoke_plan"
+            ]
+          }
+        },
+        "maximum_transfer_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "emergency_authority": {
+          "type": "boolean"
+        }
+      }
+    },
+    "valid_from": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "valid_until": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "suspended",
+        "revoked",
+        "expired"
+      ]
+    },
+    "issued_by": {
+      "$ref": "#/$defs/reference"
+    },
+    "issued_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
