@@ -1,0 +1,33 @@
+schema_version: "0.3.0"
+transformation_id: residual-transformation-invalid-auth-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-thermal-001
+classification_ref: residual-classification-thermal-001
+recovery_assessment_ref: residual-recovery-assessment-thermal-001
+phase_route:
+  - fire
+  - earth
+  - metal
+  - water
+  - wood
+authorization:
+  decision: denied
+  policy_ref: policy:residual-recovery-v0.3
+  decided_at: "2026-07-30T10:36:00+09:00"
+started_at: "2026-07-30T10:36:10+09:00"
+completed_at: "2026-07-30T10:46:10+09:00"
+output_resources:
+  - resource_id: regenerated-heat-resource-invalid-001
+    resource_type: usable_heat
+    target_phase: wood
+    quantity:
+      value: 82.0
+      unit: kWh-thermal
+value_accounting:
+  input_equivalent_value: 51.30
+  output_equivalent_value: 36.30
+  conversion_loss_value: 10.00
+  unallocated_value: 5.00
+  unit: normalized-value
+result:
+  status: completed
