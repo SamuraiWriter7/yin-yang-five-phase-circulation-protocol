@@ -35,12 +35,33 @@ CONTROLLING_EDGES = {
 EPSILON = 1e-6
 
 SCHEMA_FILES = {
-    "five-phase-state-record": SCHEMA_DIR / "five-phase-state-record.schema.json",
-    "yin-yang-balance-assessment": SCHEMA_DIR / "yin-yang-balance-assessment.schema.json",
-    "polarity-shift-receipt": SCHEMA_DIR / "polarity-shift-receipt.schema.json",
-    "five-phase-transition-policy": SCHEMA_DIR / "five-phase-transition-policy.schema.json",
-    "phase-transition-evaluation": SCHEMA_DIR / "phase-transition-evaluation.schema.json",
-    "phase-transition-receipt": SCHEMA_DIR / "phase-transition-receipt.schema.json",
+    # v0.1 records
+    "five-phase-state-record":
+        SCHEMA_DIR / "five-phase-state-record.schema.json",
+    "yin-yang-balance-assessment":
+        SCHEMA_DIR / "yin-yang-balance-assessment.schema.json",
+    "polarity-shift-receipt":
+        SCHEMA_DIR / "polarity-shift-receipt.schema.json",
+
+    # v0.2 records
+    "five-phase-transition-policy":
+        SCHEMA_DIR / "five-phase-transition-policy.schema.json",
+    "phase-transition-evaluation":
+        SCHEMA_DIR / "phase-transition-evaluation.schema.json",
+    "phase-transition-receipt":
+        SCHEMA_DIR / "phase-transition-receipt.schema.json",
+
+    # v0.3 records
+    "residual-observation-record":
+        SCHEMA_DIR / "residual-observation-record.schema.json",
+    "residual-classification-record":
+        SCHEMA_DIR / "residual-classification-record.schema.json",
+    "residual-recovery-assessment":
+        SCHEMA_DIR / "residual-recovery-assessment.schema.json",
+    "residual-transformation-receipt":
+        SCHEMA_DIR / "residual-transformation-receipt.schema.json",
+    "regenerated-value-attribution":
+        SCHEMA_DIR / "regenerated-value-attribution.schema.json",
 }
 
 
