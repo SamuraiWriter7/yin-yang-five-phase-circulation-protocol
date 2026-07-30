@@ -1,0 +1,26 @@
+schema_version: "0.3.0"
+attribution_id: regenerated-value-attribution-invalid-shares-001
+cycle_id: circulation-cycle-002
+transformation_ref: residual-transformation-thermal-001
+source_observation_ref: residual-observation-thermal-001
+value_accounting_key: r2r-value-key-thermal-invalid-001
+origin_contributions:
+  - origin_ref: origin:compute-task-thermal-001
+    contribution_weight: 0.70
+  - origin_ref: node:regional-inference-001
+    contribution_weight: 0.30
+regenerated_value:
+  amount: 36.30
+  unit: normalized-value
+allocations:
+  - beneficiary_ref: operator:regional-inference-001
+    share_ratio: 0.50
+    amount: 18.15
+  - beneficiary_ref: infrastructure:community-greenhouse-001
+    share_ratio: 0.25
+    amount: 9.075
+  - beneficiary_ref: fund:circulation-maintenance-001
+    share_ratio: 0.15
+    amount: 5.445
+royalty_status: allocated
+attributed_at: "2026-07-30T10:47:00+09:00"
