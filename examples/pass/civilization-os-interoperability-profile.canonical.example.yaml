@@ -1,0 +1,58 @@
+schema_version: 0.5.0
+profile_id: civilization-os-interoperability-profile-canonical-001
+profile_version: 0.5.0
+issued_at: '2026-07-30T13:35:00+09:00'
+local_protocol:
+  protocol_id: yin-yang-five-phase-circulation-protocol
+  version: 0.5.0
+required_stages:
+- origin
+- trace
+- authorization
+- execution
+- audit
+- royalty
+stage_bindings:
+- stage: origin
+  protocol_id: origin-trace-receipt
+  record_type: origin-record
+  minimum_version: 0.1.0
+- stage: trace
+  protocol_id: trace-relay-protocol
+  record_type: trace-record
+  minimum_version: 1.0.0
+- stage: authorization
+  protocol_id: agent-action-authorization-receipt
+  record_type: action-authorization-receipt
+  minimum_version: 0.5.0
+- stage: execution
+  protocol_id: yin-yang-five-phase-circulation-protocol
+  record_type: circulation-execution-evidence
+  minimum_version: 0.5.0
+- stage: audit
+  protocol_id: agentic-marketplace-audit
+  record_type: circulation-audit-record
+  minimum_version: 0.5.0
+- stage: royalty
+  protocol_id: royalty-allocation-ledger-agent
+  record_type: circulation-royalty-settlement-receipt
+  minimum_version: 0.5.0
+sequence_constraints:
+- predecessor: origin
+  successor: trace
+  relation: must_precede
+- predecessor: trace
+  successor: authorization
+  relation: must_precede
+- predecessor: authorization
+  successor: execution
+  relation: must_precede
+- predecessor: execution
+  successor: audit
+  relation: must_precede
+- predecessor: audit
+  successor: royalty
+  relation: must_precede
+status: active
+policy_refs:
+- policy:civilization-os-interoperability:v0.5
