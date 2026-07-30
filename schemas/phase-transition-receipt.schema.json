@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.2.0/phase-transition-receipt.schema.json",
+  "title": "Phase Transition Receipt",
+  "description": "Records authorization and execution evidence for an evaluated Five-Phase transition.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transition_id",
+    "cycle_id",
+    "evaluation_ref",
+    "policy_ref",
+    "source_phase",
+    "target_phase",
+    "source_polarity",
+    "target_polarity",
+    "relation_type",
+    "authorization",
+    "requested_at",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "transition_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cycle_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "evaluation_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "source_phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "target_phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "source_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "target_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "relation_type": {
+      "enum": [
+        "generating",
+        "controlling"
+      ]
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "policy_ref",
+        "decided_at"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "authorized",
+            "denied",
+            "human_review_required"
+          ]
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "authorized_by": {
+          "$ref": "#/$defs/reference"
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "applied",
+            "completed",
+            "rejected",
+            "failed",
+            "reverted"
+          ]
+        },
+        "post_state_record_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "polarity": {
+      "enum": [
+        "yin",
+        "yang"
+      ]
+    }
+  }
+}
