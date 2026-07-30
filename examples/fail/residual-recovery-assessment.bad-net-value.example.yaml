@@ -1,0 +1,37 @@
+schema_version: "0.3.0"
+assessment_id: residual-recovery-assessment-invalid-value-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-thermal-001
+classification_ref: residual-classification-thermal-001
+state_record_ref: five-phase-state-fire-overheated-001
+transition_policy_ref: five-phase-transition-policy-canonical-001
+phase_route:
+  - fire
+  - earth
+  - metal
+  - water
+  - wood
+transformation_type: heat_reuse
+thresholds:
+  minimum_net_value: 10.0
+  minimum_trust_factor: 0.80
+valuation:
+  converted_utility: 100.0
+  recovery_efficiency: 0.80
+  temporal_fit: 0.90
+  spatial_fit: 0.75
+  trust_factor: 0.95
+  collection_cost: 8.0
+  conversion_cost: 5.0
+  risk_cost: 2.0
+  gross_adjusted_value: 60.00
+  net_residual_value: 45.00
+  unit: normalized-value
+authorization_requirement: delegated
+decision: viable
+reason_codes:
+  - recoverable_classification_confirmed
+  - canonical_phase_route
+  - net_value_above_threshold
+  - trust_above_threshold
+assessed_at: "2026-07-30T10:35:00+09:00"
