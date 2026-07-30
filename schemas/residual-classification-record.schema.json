@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.3.0/residual-classification-record.schema.json",
+  "title": "Residual Classification Record",
+  "description": "Classifies an observed residual as recoverable, dormant, or hazardous and records containment requirements.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "classification_id",
+    "cycle_id",
+    "observation_ref",
+    "classification",
+    "confidence",
+    "classifier_ref",
+    "reason_codes",
+    "classified_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3.0"},
+    "classification_id": {"$ref": "#/$defs/identifier"},
+    "cycle_id": {"$ref": "#/$defs/identifier"},
+    "observation_ref": {"$ref": "#/$defs/reference"},
+    "classification": {
+      "enum": ["recoverable", "dormant", "hazardous"]
+    },
+    "confidence": {"$ref": "#/$defs/ratio"},
+    "classifier_ref": {"$ref": "#/$defs/reference"},
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "known_secondary_use",
+          "positive_recovery_potential",
+          "insufficient_current_use",
+          "awaiting_converter",
+          "privacy_risk",
+          "integrity_risk",
+          "security_risk",
+          "regulatory_hold",
+          "manual_review"
+        ]
+      }
+    },
+    "candidate_target_phases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/phase"}
+    },
+    "vault_ref": {"$ref": "#/$defs/reference"},
+    "review_after": {"type": "string", "format": "date-time"},
+    "quarantine_ref": {"$ref": "#/$defs/reference"},
+    "sanitization_required": {"type": "boolean"},
+    "classified_at": {"type": "string", "format": "date-time"},
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/reference"}
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "ratio": {"type": "number", "minimum": 0, "maximum": 1},
+    "phase": {
+      "enum": ["wood", "fire", "earth", "metal", "water"]
+    }
+  }
+}
