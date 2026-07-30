@@ -1,0 +1,18 @@
+schema_version: 0.5.0
+binding_id: circulation-operation-binding-auth-mismatch-001
+profile_ref: civilization-os-interoperability-profile-canonical-001
+operation_type: federated_rebalancing
+local_record_ref: federated-rebalancing-receipt-001
+context:
+  context_type: federation_epoch
+  context_id: federation-epoch-20260730-01
+origin_ref: origin:federation-emergency-rebalance-001
+trace_ref: trace:federated-rebalance-result-001
+authorization:
+  receipt_ref: authorization:federated-rebalance-001
+  decision: denied
+  scope_match: true
+actor_ref: agent:regional-circulation-governor-001
+human_axis_ref: human-axis:federation-operations-001
+bound_at: '2026-07-30T13:36:00+09:00'
+status: active
