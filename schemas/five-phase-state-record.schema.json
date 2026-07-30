@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.1.0/five-phase-state-record.schema.json",
+  "title": "Five-Phase State Record",
+  "description": "Records the current Yin-Yang operating state of all five phases in a circulation cycle.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "cycle_id",
+    "observed_at",
+    "phase_states",
+    "aggregate",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "record_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cycle_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "phase_states": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/phaseState"
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_yin_pressure",
+        "total_yang_pressure",
+        "balance_index"
+      ],
+      "properties": {
+        "total_yin_pressure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "total_yang_pressure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "balanced",
+        "yin_dominant",
+        "yang_dominant",
+        "unstable"
+      ]
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "phaseState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "polarity",
+        "yin_pressure",
+        "yang_pressure",
+        "activity_level",
+        "capacity_utilization",
+        "risk_level"
+      ],
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "polarity": {
+          "enum": [
+            "yin",
+            "yang"
+          ]
+        },
+        "yin_pressure": {
+          "$ref": "#/$defs/ratio"
+        },
+        "yang_pressure": {
+          "$ref": "#/$defs/ratio"
+        },
+        "activity_level": {
+          "$ref": "#/$defs/ratio"
+        },
+        "capacity_utilization": {
+          "$ref": "#/$defs/ratio"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/ratio"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
