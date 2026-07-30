@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.3.0/residual-recovery-assessment.schema.json",
+  "title": "Residual Recovery Assessment",
+  "description": "Evaluates whether a recoverable residual has a safe, policy-valid, and economically meaningful route through the Five-Phase cycle.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assessment_id",
+    "cycle_id",
+    "observation_ref",
+    "classification_ref",
+    "state_record_ref",
+    "transition_policy_ref",
+    "phase_route",
+    "transformation_type",
+    "thresholds",
+    "valuation",
+    "authorization_requirement",
+    "decision",
+    "reason_codes",
+    "assessed_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3.0"},
+    "assessment_id": {"$ref": "#/$defs/identifier"},
+    "cycle_id": {"$ref": "#/$defs/identifier"},
+    "observation_ref": {"$ref": "#/$defs/reference"},
+    "classification_ref": {"$ref": "#/$defs/reference"},
+    "state_record_ref": {"$ref": "#/$defs/reference"},
+    "transition_policy_ref": {"$ref": "#/$defs/reference"},
+    "phase_route": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/phase"}
+    },
+    "transformation_type": {
+      "enum": [
+        "heat_reuse",
+        "background_compute",
+        "latency_window_utilization",
+        "failure_trace_learning",
+        "micro_value_pooling"
+      ]
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_net_value", "minimum_trust_factor"],
+      "properties": {
+        "minimum_net_value": {"type": "number"},
+        "minimum_trust_factor": {"$ref": "#/$defs/ratio"}
+      }
+    },
+    "valuation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "converted_utility",
+        "recovery_efficiency",
+        "temporal_fit",
+        "spatial_fit",
+        "trust_factor",
+        "collection_cost",
+        "conversion_cost",
+        "risk_cost",
+        "gross_adjusted_value",
+        "net_residual_value",
+        "unit"
+      ],
+      "properties": {
+        "converted_utility": {"type": "number", "minimum": 0},
+        "recovery_efficiency": {"$ref": "#/$defs/ratio"},
+        "temporal_fit": {"$ref": "#/$defs/ratio"},
+        "spatial_fit": {"$ref": "#/$defs/ratio"},
+        "trust_factor": {"$ref": "#/$defs/ratio"},
+        "collection_cost": {"type": "number", "minimum": 0},
+        "conversion_cost": {"type": "number", "minimum": 0},
+        "risk_cost": {"type": "number", "minimum": 0},
+        "gross_adjusted_value": {"type": "number", "minimum": 0},
+        "net_residual_value": {"type": "number"},
+        "unit": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "authorization_requirement": {
+      "enum": ["automatic", "delegated", "human"]
+    },
+    "decision": {
+      "enum": ["viable", "not_viable", "human_review_required"]
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "recoverable_classification_confirmed",
+          "canonical_phase_route",
+          "blocked_phase_route",
+          "net_value_above_threshold",
+          "net_value_below_threshold",
+          "trust_above_threshold",
+          "trust_below_threshold",
+          "human_authorization_required"
+        ]
+      }
+    },
+    "assessed_at": {"type": "string", "format": "date-time"},
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/reference"}
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "ratio": {"type": "number", "minimum": 0, "maximum": 1},
+    "phase": {
+      "enum": ["wood", "fire", "earth", "metal", "water"]
+    }
+  }
+}
