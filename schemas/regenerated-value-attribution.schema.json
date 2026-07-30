@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.3.0/regenerated-value-attribution.schema.json",
+  "title": "Regenerated Value Attribution",
+  "description": "Connects regenerated value to its originating residual, contributors, beneficiaries, and Royalty allocation plan without double counting.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "attribution_id",
+    "cycle_id",
+    "transformation_ref",
+    "source_observation_ref",
+    "value_accounting_key",
+    "origin_contributions",
+    "regenerated_value",
+    "allocations",
+    "royalty_status",
+    "attributed_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3.0"},
+    "attribution_id": {"$ref": "#/$defs/identifier"},
+    "cycle_id": {"$ref": "#/$defs/identifier"},
+    "transformation_ref": {"$ref": "#/$defs/reference"},
+    "source_observation_ref": {"$ref": "#/$defs/reference"},
+    "value_accounting_key": {"$ref": "#/$defs/identifier"},
+    "origin_contributions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/originContribution"}
+    },
+    "regenerated_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "unit"],
+      "properties": {
+        "amount": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "allocations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/allocation"}
+    },
+    "royalty_status": {
+      "enum": ["planned", "allocated", "settled", "held"]
+    },
+    "royalty_ledger_ref": {"$ref": "#/$defs/reference"},
+    "attributed_at": {"type": "string", "format": "date-time"},
+    "trace_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/reference"}
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "ratio": {"type": "number", "minimum": 0, "maximum": 1},
+    "originContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin_ref", "contribution_weight"],
+      "properties": {
+        "origin_ref": {"$ref": "#/$defs/reference"},
+        "contribution_weight": {"$ref": "#/$defs/ratio"}
+      }
+    },
+    "allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["beneficiary_ref", "share_ratio", "amount"],
+      "properties": {
+        "beneficiary_ref": {"$ref": "#/$defs/reference"},
+        "share_ratio": {"$ref": "#/$defs/ratio"},
+        "amount": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}
