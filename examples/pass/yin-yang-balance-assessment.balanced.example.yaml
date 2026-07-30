@@ -1,0 +1,52 @@
+schema_version: "0.2.0"
+assessment_id: yin-yang-assessment-balanced-001
+cycle_id: circulation-cycle-001
+state_record_ref: five-phase-state-balanced-001
+assessed_at: "2026-07-30T10:01:00+09:00"
+
+thresholds:
+  minimum_balance_index: 0.80
+  maximum_balance_index: 1.20
+  critical_phase_risk: 0.90
+
+observed:
+  total_yin_pressure: 2.60
+  total_yang_pressure: 2.40
+  balance_index: 0.923077
+
+phase_assessments:
+  - phase: wood
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Node growth remains within available capacity and risk limits.
+
+  - phase: fire
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Compute activity remains below thermal and utilization limits.
+
+  - phase: earth
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Trace retention and storage utilization remain stable.
+
+  - phase: metal
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Authorization, valuation, and settlement remain responsive.
+
+  - phase: water
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Cooling, routing, liquidity, and reserve capacity remain stable.
+
+overall_status: balanced
+
+recommended_actions: []
+
+policy_ref: policy:five-phase-balance:v0.2
