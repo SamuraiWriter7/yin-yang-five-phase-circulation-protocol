@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.4.0/federated-balance-assessment.schema.json",
+  "title": "Federated Balance Assessment",
+  "description": "Aggregates local Yin-Yang Five-Phase states into a federation-wide balance and resource-gap assessment.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assessment_id",
+    "federation_id",
+    "epoch_id",
+    "assessed_at",
+    "member_states",
+    "federation_totals",
+    "imbalances",
+    "overall_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0"
+    },
+    "assessment_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "federation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "epoch_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "assessed_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "member_states": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/memberState"
+      }
+    },
+    "federation_totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available_export_capacity",
+        "unmet_demand",
+        "net_capacity",
+        "maximum_member_risk"
+      ],
+      "properties": {
+        "available_export_capacity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unmet_demand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "net_capacity": {
+          "type": "number"
+        },
+        "maximum_member_risk": {
+          "$ref": "#/$defs/ratio"
+        }
+      }
+    },
+    "imbalances": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/imbalance"
+      }
+    },
+    "overall_status": {
+      "enum": [
+        "balanced",
+        "localized_imbalance",
+        "federation_unstable"
+      ]
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "memberState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "member_id",
+        "region",
+        "state_record_ref",
+        "balance_index",
+        "risk_level",
+        "available_export_capacity",
+        "unmet_demand",
+        "trust_factor"
+      ],
+      "properties": {
+        "member_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "region": {
+          "$ref": "#/$defs/identifier"
+        },
+        "state_record_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "risk_level": {
+          "$ref": "#/$defs/ratio"
+        },
+        "available_export_capacity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unmet_demand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "trust_factor": {
+          "$ref": "#/$defs/ratio"
+        }
+      }
+    },
+    "resourceNeed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_type",
+        "amount",
+        "unit",
+        "target_phase"
+      ],
+      "properties": {
+        "resource_type": {
+          "enum": [
+            "compute_capacity",
+            "cooling_capacity",
+            "storage_capacity",
+            "bandwidth",
+            "liquidity",
+            "workload"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "target_phase": {
+          "$ref": "#/$defs/phase"
+        }
+      }
+    },
+    "imbalance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "member_id",
+        "severity",
+        "required_resources",
+        "reason"
+      ],
+      "properties": {
+        "member_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "severity": {
+          "enum": [
+            "warning",
+            "critical"
+          ]
+        },
+        "required_resources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/resourceNeed"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
