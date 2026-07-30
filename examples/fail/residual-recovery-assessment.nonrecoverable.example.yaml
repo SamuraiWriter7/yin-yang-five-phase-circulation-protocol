@@ -1,0 +1,34 @@
+schema_version: "0.3.0"
+assessment_id: residual-recovery-assessment-invalid-nonrecoverable-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-info-dormant-001
+classification_ref: residual-classification-info-dormant-001
+state_record_ref: five-phase-state-fire-overheated-001
+transition_policy_ref: five-phase-transition-policy-canonical-001
+phase_route:
+  - fire
+  - earth
+transformation_type: failure_trace_learning
+thresholds:
+  minimum_net_value: 1.0
+  minimum_trust_factor: 0.70
+valuation:
+  converted_utility: 10.0
+  recovery_efficiency: 0.80
+  temporal_fit: 0.80
+  spatial_fit: 1.00
+  trust_factor: 0.80
+  collection_cost: 1.0
+  conversion_cost: 1.0
+  risk_cost: 1.0
+  gross_adjusted_value: 5.12
+  net_residual_value: 2.12
+  unit: normalized-value
+authorization_requirement: delegated
+decision: viable
+reason_codes:
+  - recoverable_classification_confirmed
+  - canonical_phase_route
+  - net_value_above_threshold
+  - trust_above_threshold
+assessed_at: "2026-07-30T10:35:00+09:00"
