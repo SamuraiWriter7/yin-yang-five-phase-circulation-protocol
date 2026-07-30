@@ -1,0 +1,29 @@
+schema_version: 0.5.0
+conformance_id: civilization-os-conformance-missing-trace-001
+profile_ref: civilization-os-interoperability-profile-canonical-001
+binding_ref: circulation-operation-binding-federated-001
+execution_evidence_ref: circulation-execution-evidence-federated-001
+audit_ref: circulation-audit-federated-001
+settlement_ref: circulation-royalty-settlement-federated-001
+checked_stages:
+- stage: origin
+  record_ref: origin:federation-emergency-rebalance-001
+  status: conformant
+- stage: trace
+  record_ref: trace:federated-rebalance-result-001
+  status: missing
+- stage: authorization
+  record_ref: authorization:federated-rebalance-001
+  status: conformant
+- stage: execution
+  record_ref: circulation-execution-evidence-federated-001
+  status: conformant
+- stage: audit
+  record_ref: circulation-audit-federated-001
+  status: conformant
+- stage: royalty
+  record_ref: circulation-royalty-settlement-federated-001
+  status: conformant
+overall_status: conformant
+findings: []
+checked_at: '2026-07-30T13:41:00+09:00'
