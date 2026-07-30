@@ -1,0 +1,25 @@
+schema_version: "0.2.0"
+transition_id: phase-transition-water-fire-001
+cycle_id: circulation-cycle-002
+evaluation_ref: phase-transition-evaluation-water-fire-001
+policy_ref: five-phase-transition-policy-canonical-001
+
+source_phase: water
+target_phase: fire
+source_polarity: yang
+target_polarity: yin
+relation_type: controlling
+
+authorization:
+  decision: authorized
+  policy_ref: five-phase-transition-policy-canonical-001
+  authorized_by: agent:circulation-governor-001
+  decided_at: "2026-07-30T10:20:20+09:00"
+
+requested_at: "2026-07-30T10:20:00+09:00"
+effective_at: "2026-07-30T10:20:25+09:00"
+
+result:
+  status: applied
+  evidence_refs:
+    - trace:fire-load-reduction-001
