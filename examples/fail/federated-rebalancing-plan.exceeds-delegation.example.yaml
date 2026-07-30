@@ -1,0 +1,56 @@
+schema_version: 0.4.0
+plan_id: federated-rebalancing-plan-excess-001
+federation_id: federation-kazene-001
+epoch_id: federation-epoch-20260730-01
+assessment_ref: federated-balance-assessment-001
+delegation_ref: governor-delegation-regional-001
+governor_ref: agent:regional-circulation-governor-001
+created_at: '2026-07-30T10:26:00+09:00'
+emergency: true
+emergency_reason: Member-east Fire risk reached 0.94.
+transfer_candidates:
+- transfer_id: transfer-compute-primary-001
+  source_member_id: member-west-001
+  target_member_id: member-east-001
+  resource_type: compute_capacity
+  amount: 0.5
+  unit: normalized_capacity
+  source_phase: fire
+  target_phase: fire
+  relation_type: federated_support
+  priority: critical
+  route_ref: route:west-east-primary
+- transfer_id: transfer-compute-alternate-001
+  source_member_id: member-west-001
+  target_member_id: member-east-001
+  resource_type: compute_capacity
+  amount: 0.2
+  unit: normalized_capacity
+  source_phase: fire
+  target_phase: fire
+  relation_type: federated_support
+  priority: high
+  route_ref: route:west-east-alternate
+- transfer_id: transfer-cooling-001
+  source_member_id: member-west-001
+  target_member_id: member-east-001
+  resource_type: cooling_capacity
+  amount: 0.05
+  unit: normalized_capacity
+  source_phase: water
+  target_phase: water
+  relation_type: federated_support
+  priority: critical
+  route_ref: route:cooling-west-east
+conflict_groups:
+- conflict_group_id: conflict-route-choice-001
+  transfer_ids:
+  - transfer-compute-primary-001
+  - transfer-compute-alternate-001
+  reason: Only one compute route should reserve the emergency capacity window.
+expected_post_balance:
+  overall_status: balanced
+  remaining_unmet_demand: 0.0
+  maximum_member_risk: 0.75
+status: ready_for_resolution
+policy_ref: policy:federated-rebalancing:v0.4
