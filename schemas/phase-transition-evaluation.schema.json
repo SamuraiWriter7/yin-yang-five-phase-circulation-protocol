@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.2.0/phase-transition-evaluation.schema.json",
+  "title": "Phase Transition Evaluation",
+  "description": "Evaluates a proposed Five-Phase transition against canonical relations, restrictions, polarity context, and cooldown rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evaluation_id",
+    "cycle_id",
+    "state_record_ref",
+    "assessment_ref",
+    "policy_ref",
+    "source_phase",
+    "target_phase",
+    "source_polarity",
+    "target_polarity",
+    "relation_type",
+    "trigger_code",
+    "emergency",
+    "timing",
+    "decision",
+    "reason_codes",
+    "evaluated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "evaluation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cycle_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "state_record_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "assessment_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "source_phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "target_phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "source_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "target_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "relation_type": {
+      "enum": [
+        "generating",
+        "controlling",
+        "none"
+      ]
+    },
+    "trigger_code": {
+      "enum": [
+        "capacity_available",
+        "resource_reserve_ready",
+        "overheat_control",
+        "storage_pressure",
+        "liquidity_rebalance",
+        "growth_stimulation",
+        "risk_containment",
+        "manual_request"
+      ]
+    },
+    "emergency": {
+      "type": "boolean"
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "last_transition_at",
+        "requested_at",
+        "elapsed_seconds",
+        "required_cooldown_seconds",
+        "cooldown_satisfied"
+      ],
+      "properties": {
+        "last_transition_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "elapsed_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "required_cooldown_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cooldown_satisfied": {
+          "type": "boolean"
+        }
+      }
+    },
+    "decision": {
+      "enum": [
+        "allowed",
+        "denied",
+        "human_review_required"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "canonical_generating_relation",
+          "canonical_controlling_relation",
+          "blocked_by_policy",
+          "noncanonical_path",
+          "human_review_policy",
+          "cooldown_satisfied",
+          "cooldown_not_satisfied",
+          "emergency_bypass",
+          "state_reference_valid",
+          "assessment_reference_valid"
+        ]
+      }
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "polarity": {
+      "enum": [
+        "yin",
+        "yang"
+      ]
+    }
+  }
+}
