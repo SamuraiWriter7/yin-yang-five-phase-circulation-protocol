@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.5.0/circulation-operation-binding.schema.json",
+  "title": "Circulation Operation Binding",
+  "description": "Binds a local circulation operation to external Origin, Trace, and Authorization records under an interoperability profile.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "binding_id",
+    "profile_ref",
+    "operation_type",
+    "local_record_ref",
+    "context",
+    "origin_ref",
+    "trace_ref",
+    "authorization",
+    "actor_ref",
+    "bound_at",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "binding_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "profile_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "operation_type": {
+      "enum": [
+        "phase_transition",
+        "residual_transformation",
+        "federated_rebalancing"
+      ]
+    },
+    "local_record_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_type",
+        "context_id"
+      ],
+      "properties": {
+        "context_type": {
+          "enum": [
+            "cycle",
+            "federation_epoch"
+          ]
+        },
+        "context_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "origin_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "trace_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_ref",
+        "decision",
+        "scope_match"
+      ],
+      "properties": {
+        "receipt_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "decision": {
+          "enum": [
+            "authorized",
+            "denied",
+            "human_review_required"
+          ]
+        },
+        "scope_match": {
+          "type": "boolean"
+        }
+      }
+    },
+    "actor_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "human_axis_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "bound_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "revoked"
+      ]
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  }
+}
