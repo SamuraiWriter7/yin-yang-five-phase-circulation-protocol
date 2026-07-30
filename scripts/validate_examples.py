@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Yin-Yang Five-Phase Circulation Protocol v0.2 examples."""
+"""Validate Yin-Yang Five-Phase Circulation Protocol v0.3 examples."""
 
 from __future__ import annotations
 
@@ -35,33 +35,27 @@ CONTROLLING_EDGES = {
 EPSILON = 1e-6
 
 SCHEMA_FILES = {
-    # v0.1 records
-    "five-phase-state-record":
-        SCHEMA_DIR / "five-phase-state-record.schema.json",
-    "yin-yang-balance-assessment":
-        SCHEMA_DIR / "yin-yang-balance-assessment.schema.json",
-    "polarity-shift-receipt":
-        SCHEMA_DIR / "polarity-shift-receipt.schema.json",
-
-    # v0.2 records
-    "five-phase-transition-policy":
-        SCHEMA_DIR / "five-phase-transition-policy.schema.json",
-    "phase-transition-evaluation":
-        SCHEMA_DIR / "phase-transition-evaluation.schema.json",
-    "phase-transition-receipt":
-        SCHEMA_DIR / "phase-transition-receipt.schema.json",
-
-    # v0.3 records
-    "residual-observation-record":
-        SCHEMA_DIR / "residual-observation-record.schema.json",
-    "residual-classification-record":
-        SCHEMA_DIR / "residual-classification-record.schema.json",
-    "residual-recovery-assessment":
-        SCHEMA_DIR / "residual-recovery-assessment.schema.json",
-    "residual-transformation-receipt":
-        SCHEMA_DIR / "residual-transformation-receipt.schema.json",
-    "regenerated-value-attribution":
-        SCHEMA_DIR / "regenerated-value-attribution.schema.json",
+    "five-phase-state-record": SCHEMA_DIR / "five-phase-state-record.schema.json",
+    "yin-yang-balance-assessment": SCHEMA_DIR / "yin-yang-balance-assessment.schema.json",
+    "polarity-shift-receipt": SCHEMA_DIR / "polarity-shift-receipt.schema.json",
+    "five-phase-transition-policy": SCHEMA_DIR / "five-phase-transition-policy.schema.json",
+    "phase-transition-evaluation": SCHEMA_DIR / "phase-transition-evaluation.schema.json",
+    "phase-transition-receipt": SCHEMA_DIR / "phase-transition-receipt.schema.json",
+    "residual-observation-record": (
+        SCHEMA_DIR / "residual-observation-record.schema.json"
+    ),
+    "residual-classification-record": (
+        SCHEMA_DIR / "residual-classification-record.schema.json"
+    ),
+    "residual-recovery-assessment": (
+        SCHEMA_DIR / "residual-recovery-assessment.schema.json"
+    ),
+    "residual-transformation-receipt": (
+        SCHEMA_DIR / "residual-transformation-receipt.schema.json"
+    ),
+    "regenerated-value-attribution": (
+        SCHEMA_DIR / "regenerated-value-attribution.schema.json"
+    ),
 }
 
 
@@ -442,6 +436,501 @@ def validate_transition_receipt(
     registry[data["transition_id"]] = data
 
 
+
+def resolve_record(
+    registry: dict[str, dict[str, Any]],
+    reference: str,
+    label: str,
+) -> dict[str, Any]:
+    record = registry.get(reference)
+
+    if record is None:
+        raise SemanticError(
+            f"{label} does not resolve: {reference}"
+        )
+
+    return record
+
+
+def validate_residual_observation(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    if (
+        data["containment_level"] == "quarantined"
+        and "content_fingerprint" not in data
+    ):
+        raise SemanticError(
+            "quarantined residuals require content_fingerprint"
+        )
+
+    registry[data["observation_id"]] = data
+
+
+def validate_residual_classification(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    observation = resolve_record(
+        registry,
+        data["observation_ref"],
+        "observation_ref",
+    )
+
+    if observation["cycle_id"] != data["cycle_id"]:
+        raise SemanticError(
+            "cycle_id must match the referenced observation"
+        )
+
+    classification = data["classification"]
+    has_targets = bool(data.get("candidate_target_phases"))
+    has_vault = "vault_ref" in data
+    has_review = "review_after" in data
+    has_quarantine = "quarantine_ref" in data
+
+    if classification == "recoverable":
+        if not has_targets:
+            raise SemanticError(
+                "recoverable classification requires "
+                "candidate_target_phases"
+            )
+
+        if has_vault or has_quarantine:
+            raise SemanticError(
+                "recoverable classification cannot include "
+                "vault_ref or quarantine_ref"
+            )
+
+    elif classification == "dormant":
+        if not has_vault or not has_review:
+            raise SemanticError(
+                "dormant classification requires "
+                "vault_ref and review_after"
+            )
+
+        if has_targets or has_quarantine:
+            raise SemanticError(
+                "dormant classification cannot be routed "
+                "or quarantined"
+            )
+
+    elif classification == "hazardous":
+        if not has_quarantine:
+            raise SemanticError(
+                "hazardous classification requires quarantine_ref"
+            )
+
+        if has_targets or has_vault:
+            raise SemanticError(
+                "hazardous classification cannot include "
+                "an active route or vault_ref"
+            )
+
+        if data.get("sanitization_required") is not True:
+            raise SemanticError(
+                "hazardous classification requires "
+                "sanitization_required: true"
+            )
+
+        if observation["containment_level"] == "open":
+            raise SemanticError(
+                "hazardous residuals cannot remain open"
+            )
+
+    registry[data["classification_id"]] = data
+
+
+def validate_residual_recovery_assessment(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    observation = resolve_record(
+        registry,
+        data["observation_ref"],
+        "observation_ref",
+    )
+    classification = resolve_record(
+        registry,
+        data["classification_ref"],
+        "classification_ref",
+    )
+    state_record = resolve_record(
+        registry,
+        data["state_record_ref"],
+        "state_record_ref",
+    )
+    transition_policy = resolve_record(
+        registry,
+        data["transition_policy_ref"],
+        "transition_policy_ref",
+    )
+
+    if any(
+        record["cycle_id"] != data["cycle_id"]
+        for record in (
+            observation,
+            classification,
+            state_record,
+        )
+    ):
+        raise SemanticError(
+            "cycle_id must match observation, classification, "
+            "and state records"
+        )
+
+    if classification["observation_ref"] != data["observation_ref"]:
+        raise SemanticError(
+            "classification_ref must classify "
+            "the referenced observation"
+        )
+
+    if classification["classification"] != "recoverable":
+        raise SemanticError(
+            "recovery assessment requires "
+            "a recoverable classification"
+        )
+
+    phase_route = data["phase_route"]
+
+    if phase_route[0] != observation["source_phase"]:
+        raise SemanticError(
+            "phase_route must begin with "
+            "the observation source_phase"
+        )
+
+    if (
+        phase_route[-1]
+        not in classification["candidate_target_phases"]
+    ):
+        raise SemanticError(
+            "phase_route must end in a candidate_target_phase"
+        )
+
+    generating_edges = {
+        (
+            edge["source_phase"],
+            edge["target_phase"],
+        )
+        for edge in transition_policy["generating_cycle"]
+    }
+    controlling_edges = {
+        (
+            edge["source_phase"],
+            edge["target_phase"],
+        )
+        for edge in transition_policy["controlling_cycle"]
+    }
+    blocked_edges = {
+        (
+            edge["source_phase"],
+            edge["target_phase"],
+        )
+        for edge in transition_policy["blocked_transitions"]
+    }
+
+    route_edges = list(
+        zip(
+            phase_route,
+            phase_route[1:],
+        )
+    )
+
+    route_valid = all(
+        edge in generating_edges | controlling_edges
+        and edge not in blocked_edges
+        for edge in route_edges
+    )
+
+    valuation = data["valuation"]
+
+    gross_adjusted_value = (
+        float(valuation["converted_utility"])
+        * float(valuation["recovery_efficiency"])
+        * float(valuation["temporal_fit"])
+        * float(valuation["spatial_fit"])
+        * float(valuation["trust_factor"])
+    )
+
+    net_residual_value = gross_adjusted_value - (
+        float(valuation["collection_cost"])
+        + float(valuation["conversion_cost"])
+        + float(valuation["risk_cost"])
+    )
+
+    require_close(
+        float(valuation["gross_adjusted_value"]),
+        gross_adjusted_value,
+        "valuation.gross_adjusted_value",
+    )
+    require_close(
+        float(valuation["net_residual_value"]),
+        net_residual_value,
+        "valuation.net_residual_value",
+    )
+
+    thresholds = data["thresholds"]
+    net_value_sufficient = (
+        net_residual_value
+        >= float(thresholds["minimum_net_value"])
+    )
+    trust_sufficient = (
+        float(valuation["trust_factor"])
+        >= float(thresholds["minimum_trust_factor"])
+    )
+
+    if (
+        not route_valid
+        or not net_value_sufficient
+        or not trust_sufficient
+    ):
+        expected_decision = "not_viable"
+    elif data["authorization_requirement"] == "human":
+        expected_decision = "human_review_required"
+    else:
+        expected_decision = "viable"
+
+    if data["decision"] != expected_decision:
+        raise SemanticError(
+            f"decision must be '{expected_decision}'"
+        )
+
+    registry[data["assessment_id"]] = data
+
+
+def validate_residual_transformation(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    observation = resolve_record(
+        registry,
+        data["observation_ref"],
+        "observation_ref",
+    )
+    classification = resolve_record(
+        registry,
+        data["classification_ref"],
+        "classification_ref",
+    )
+    recovery_assessment = resolve_record(
+        registry,
+        data["recovery_assessment_ref"],
+        "recovery_assessment_ref",
+    )
+
+    if any(
+        record["cycle_id"] != data["cycle_id"]
+        for record in (
+            observation,
+            classification,
+            recovery_assessment,
+        )
+    ):
+        raise SemanticError(
+            "cycle_id must match all referenced R2R records"
+        )
+
+    if (
+        recovery_assessment["observation_ref"]
+        != data["observation_ref"]
+    ):
+        raise SemanticError(
+            "recovery assessment must reference "
+            "the same observation"
+        )
+
+    if (
+        recovery_assessment["classification_ref"]
+        != data["classification_ref"]
+    ):
+        raise SemanticError(
+            "recovery assessment must reference "
+            "the same classification"
+        )
+
+    if data["phase_route"] != recovery_assessment["phase_route"]:
+        raise SemanticError(
+            "phase_route must match the recovery assessment"
+        )
+
+    result_status = data["result"]["status"]
+
+    if result_status in {"completed", "partial"}:
+        if recovery_assessment["decision"] != "viable":
+            raise SemanticError(
+                "completed or partial transformation "
+                "requires a viable assessment"
+            )
+
+        if data["authorization"]["decision"] != "authorized":
+            raise SemanticError(
+                "completed or partial transformation "
+                "requires authorization"
+            )
+
+        if "completed_at" not in data:
+            raise SemanticError(
+                "completed or partial transformation "
+                "requires completed_at"
+            )
+
+        if not data.get("output_resources"):
+            raise SemanticError(
+                "completed or partial transformation "
+                "requires output_resources"
+            )
+
+        final_phase = data["phase_route"][-1]
+
+        for output in data["output_resources"]:
+            if output["target_phase"] != final_phase:
+                raise SemanticError(
+                    "output resource target_phase must match "
+                    "the final phase_route phase"
+                )
+
+    accounting = data["value_accounting"]
+    input_value = float(accounting["input_equivalent_value"])
+    output_value = float(accounting["output_equivalent_value"])
+    loss_value = float(accounting["conversion_loss_value"])
+    unallocated_value = float(accounting["unallocated_value"])
+
+    require_close(
+        input_value,
+        output_value + loss_value + unallocated_value,
+        "value conservation",
+    )
+
+    assessed_valuation = recovery_assessment["valuation"]
+
+    require_close(
+        input_value,
+        float(assessed_valuation["gross_adjusted_value"]),
+        "input/assessment gross value",
+    )
+
+    assessed_net_value = float(
+        assessed_valuation["net_residual_value"]
+    )
+
+    if output_value - assessed_net_value > EPSILON:
+        raise SemanticError(
+            "output_equivalent_value cannot exceed "
+            "assessed net_residual_value"
+        )
+
+    if result_status == "completed":
+        require_close(
+            output_value,
+            assessed_net_value,
+            "completed output/net value",
+        )
+
+    registry[data["transformation_id"]] = data
+
+
+def validate_regenerated_value_attribution(
+    data: dict[str, Any],
+    registry: dict[str, dict[str, Any]],
+) -> None:
+    transformation = resolve_record(
+        registry,
+        data["transformation_ref"],
+        "transformation_ref",
+    )
+    observation = resolve_record(
+        registry,
+        data["source_observation_ref"],
+        "source_observation_ref",
+    )
+
+    if (
+        transformation["cycle_id"] != data["cycle_id"]
+        or observation["cycle_id"] != data["cycle_id"]
+    ):
+        raise SemanticError(
+            "cycle_id must match transformation and observation"
+        )
+
+    if (
+        transformation["observation_ref"]
+        != data["source_observation_ref"]
+    ):
+        raise SemanticError(
+            "source_observation_ref must match "
+            "the transformation observation"
+        )
+
+    if transformation["result"]["status"] not in {
+        "completed",
+        "partial",
+    }:
+        raise SemanticError(
+            "attribution requires a completed "
+            "or partial transformation"
+        )
+
+    for record in registry.values():
+        if (
+            record.get("value_accounting_key")
+            == data["value_accounting_key"]
+        ):
+            raise SemanticError(
+                "value_accounting_key must be unique"
+            )
+
+    contribution_total = sum(
+        float(item["contribution_weight"])
+        for item in data["origin_contributions"]
+    )
+    share_total = sum(
+        float(item["share_ratio"])
+        for item in data["allocations"]
+    )
+    allocation_total = sum(
+        float(item["amount"])
+        for item in data["allocations"]
+    )
+    regenerated_value = float(
+        data["regenerated_value"]["amount"]
+    )
+
+    require_close(
+        contribution_total,
+        1.0,
+        "origin contribution weights",
+    )
+    require_close(
+        share_total,
+        1.0,
+        "allocation share ratios",
+    )
+    require_close(
+        allocation_total,
+        regenerated_value,
+        "allocation amounts",
+    )
+
+    transformed_output = float(
+        transformation["value_accounting"]
+        ["output_equivalent_value"]
+    )
+
+    if regenerated_value - transformed_output > EPSILON:
+        raise SemanticError(
+            "regenerated value cannot exceed "
+            "transformed output value"
+        )
+
+    if (
+        data["royalty_status"] == "settled"
+        and "royalty_ledger_ref" not in data
+    ):
+        raise SemanticError(
+            "settled attribution requires royalty_ledger_ref"
+        )
+
+    registry[data["attribution_id"]] = data
+
 SEMANTIC_VALIDATORS: dict[
     str,
     Callable[[dict[str, Any], dict[str, dict[str, Any]]], None],
@@ -452,6 +941,13 @@ SEMANTIC_VALIDATORS: dict[
     "five-phase-transition-policy": validate_transition_policy,
     "phase-transition-evaluation": validate_transition_evaluation,
     "phase-transition-receipt": validate_transition_receipt,
+    "residual-observation-record": validate_residual_observation,
+    "residual-classification-record": validate_residual_classification,
+    "residual-recovery-assessment": validate_residual_recovery_assessment,
+    "residual-transformation-receipt": validate_residual_transformation,
+    "regenerated-value-attribution": (
+        validate_regenerated_value_attribution
+    ),
 }
 
 
@@ -522,7 +1018,7 @@ def validate_fail_examples(
 
 
 def main() -> int:
-    print("=== Yin-Yang Five-Phase Circulation Protocol v0.2 Validation ===")
+    print("=== Yin-Yang Five-Phase Circulation Protocol v0.3 Validation ===")
     validators: dict[str, Draft202012Validator] = {}
     for kind, schema_path in SCHEMA_FILES.items():
         schema = load_schema(schema_path)
