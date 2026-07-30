@@ -1,0 +1,52 @@
+schema_version: "0.1.0"
+record_id: five-phase-state-duplicate-001
+cycle_id: circulation-cycle-fail-001
+observed_at: "2026-07-30T10:10:00+09:00"
+
+phase_states:
+  - phase: wood
+    polarity: yang
+    yin_pressure: 0.4
+    yang_pressure: 0.6
+    activity_level: 0.5
+    capacity_utilization: 0.5
+    risk_level: 0.2
+
+  - phase: fire
+    polarity: yang
+    yin_pressure: 0.4
+    yang_pressure: 0.6
+    activity_level: 0.5
+    capacity_utilization: 0.5
+    risk_level: 0.2
+
+  - phase: earth
+    polarity: yin
+    yin_pressure: 0.6
+    yang_pressure: 0.4
+    activity_level: 0.5
+    capacity_utilization: 0.5
+    risk_level: 0.2
+
+  - phase: metal
+    polarity: yang
+    yin_pressure: 0.4
+    yang_pressure: 0.6
+    activity_level: 0.5
+    capacity_utilization: 0.5
+    risk_level: 0.2
+
+  - phase: wood
+    polarity: yin
+    yin_pressure: 0.6
+    yang_pressure: 0.4
+    activity_level: 0.5
+    capacity_utilization: 0.5
+    risk_level: 0.2
+
+aggregate:
+  total_yin_pressure: 2.4
+  total_yang_pressure: 2.6
+  balance_index: 1.083333
+
+status: balanced
