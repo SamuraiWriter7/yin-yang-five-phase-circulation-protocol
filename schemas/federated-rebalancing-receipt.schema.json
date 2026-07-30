@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.4.0/federated-rebalancing-receipt.schema.json",
+  "title": "Federated Rebalancing Receipt",
+  "description": "Records authorized execution and outcome of a federated rebalancing plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "federation_id",
+    "epoch_id",
+    "plan_ref",
+    "delegation_ref",
+    "conflict_resolution_refs",
+    "emergency",
+    "authorization",
+    "started_at",
+    "executed_transfers",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0"
+    },
+    "receipt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "federation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "epoch_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "delegation_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "conflict_resolution_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "emergency": {
+      "type": "boolean"
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "authorized_by",
+        "decided_at"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "authorized",
+            "denied",
+            "human_review_required"
+          ]
+        },
+        "authorized_by": {
+          "$ref": "#/$defs/reference"
+        },
+        "decided_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "authorization_ref": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "started_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "completed_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "executed_transfers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/executedTransfer"
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "remaining_unmet_demand",
+        "maximum_member_risk"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "applied",
+            "completed",
+            "partial",
+            "failed",
+            "reverted"
+          ]
+        },
+        "remaining_unmet_demand": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximum_member_risk": {
+          "$ref": "#/$defs/ratio"
+        },
+        "post_assessment_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "executedTransfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transfer_ref",
+        "executed_amount",
+        "unit",
+        "status"
+      ],
+      "properties": {
+        "transfer_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "executed_amount": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "partial",
+            "failed",
+            "reverted"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        }
+      }
+    }
+  }
+}
