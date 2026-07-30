@@ -1,0 +1,18 @@
+schema_version: 0.5.0
+audit_id: circulation-audit-false-pass-001
+profile_ref: civilization-os-interoperability-profile-canonical-001
+binding_ref: circulation-operation-binding-federated-001
+execution_evidence_ref: circulation-execution-evidence-federated-001
+auditor_ref: agent:circulation-auditor-001
+checks:
+  origin_resolved: true
+  trace_resolved: true
+  authorization_match: false
+  execution_consistent: true
+  phase_policy_conformant: true
+  royalty_eligible: true
+decision: pass
+unresolved_findings: []
+audited_at: '2026-07-30T13:38:00+09:00'
+evidence_refs:
+- trace:audit-federated-rebalance-001
