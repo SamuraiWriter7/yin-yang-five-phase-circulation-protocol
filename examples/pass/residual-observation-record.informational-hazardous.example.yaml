@@ -1,0 +1,18 @@
+schema_version: "0.3.0"
+observation_id: residual-observation-info-hazardous-001
+cycle_id: circulation-cycle-002
+origin_ref: origin:untrusted-input-stream-001
+source_execution_ref: execution:input-screening-001
+source_phase: metal
+residual_type: informational
+observed_at: "2026-07-30T10:32:00+09:00"
+quantity:
+  value: 3
+  unit: payload-fingerprints
+containment_level: quarantined
+content_fingerprint: sha256:hazardous-payload-set-001
+
+description: Untrusted payload fingerprints associated with integrity and security risk.
+
+evidence_refs:
+  - audit:input-screening-001
