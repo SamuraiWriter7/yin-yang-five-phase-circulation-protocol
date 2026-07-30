@@ -1,0 +1,35 @@
+schema_version: "0.2.0"
+evaluation_id: phase-transition-evaluation-cooldown-denied-001
+cycle_id: circulation-cycle-001
+state_record_ref: five-phase-state-balanced-001
+assessment_ref: yin-yang-assessment-balanced-001
+policy_ref: five-phase-transition-policy-canonical-001
+
+source_phase: water
+target_phase: wood
+source_polarity: yin
+target_polarity: yang
+relation_type: generating
+
+trigger_code: resource_reserve_ready
+emergency: false
+
+timing:
+  last_transition_at: "2026-07-30T10:15:00+09:00"
+  requested_at: "2026-07-30T10:20:00+09:00"
+  elapsed_seconds: 300
+  required_cooldown_seconds: 900
+  cooldown_satisfied: false
+
+decision: denied
+
+reason_codes:
+  - canonical_generating_relation
+  - cooldown_not_satisfied
+  - state_reference_valid
+  - assessment_reference_valid
+
+evaluated_at: "2026-07-30T10:20:06+09:00"
+
+evidence_refs:
+  - trace:water-reserve-002
