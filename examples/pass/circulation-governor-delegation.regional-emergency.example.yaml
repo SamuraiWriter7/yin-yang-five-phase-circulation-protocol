@@ -1,0 +1,28 @@
+schema_version: 0.4.0
+delegation_id: governor-delegation-regional-001
+federation_id: federation-kazene-001
+governor_ref: agent:regional-circulation-governor-001
+authority_scope:
+  regions:
+  - jp-east
+  - jp-west
+  members:
+  - member-east-001
+  - member-west-001
+  phases:
+  - fire
+  - water
+  allowed_actions:
+  - assess_federation
+  - propose_rebalance
+  - authorize_rebalance
+  - resolve_conflict
+  - emergency_rebalance
+  maximum_transfer_ratio: 0.8
+  emergency_authority: true
+valid_from: '2026-07-30T00:00:00+09:00'
+valid_until: '2026-08-30T00:00:00+09:00'
+status: active
+issued_by: authority:federation-governance-board
+issued_at: '2026-07-30T09:00:00+09:00'
+policy_ref: policy:federated-rebalancing:v0.4
