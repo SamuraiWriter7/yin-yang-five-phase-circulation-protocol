@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.5.0/civilization-os-conformance-assessment.schema.json",
+  "title": "Civilization OS Conformance Assessment",
+  "description": "Verifies the complete Origin-to-Royalty chain for one circulation operation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "conformance_id",
+    "profile_ref",
+    "binding_ref",
+    "execution_evidence_ref",
+    "audit_ref",
+    "settlement_ref",
+    "checked_stages",
+    "overall_status",
+    "findings",
+    "checked_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "conformance_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "profile_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "binding_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "execution_evidence_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "audit_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "settlement_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "checked_stages": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stage",
+          "record_ref",
+          "status"
+        ],
+        "properties": {
+          "stage": {
+            "$ref": "#/$defs/stage"
+          },
+          "record_ref": {
+            "$ref": "#/$defs/reference"
+          },
+          "status": {
+            "enum": [
+              "conformant",
+              "missing",
+              "invalid"
+            ]
+          }
+        }
+      }
+    },
+    "overall_status": {
+      "enum": [
+        "conformant",
+        "nonconformant",
+        "human_review_required"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "stage": {
+      "enum": [
+        "origin",
+        "trace",
+        "authorization",
+        "execution",
+        "audit",
+        "royalty"
+      ]
+    }
+  }
+}
