@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.1.0/yin-yang-balance-assessment.schema.json",
+  "title": "Yin-Yang Balance Assessment",
+  "description": "Assesses cycle-wide and phase-level stability using configurable Yin-Yang balance thresholds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assessment_id",
+    "cycle_id",
+    "state_record_ref",
+    "assessed_at",
+    "thresholds",
+    "observed",
+    "phase_assessments",
+    "overall_status",
+    "recommended_actions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "assessment_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cycle_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "state_record_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "assessed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_balance_index",
+        "maximum_balance_index",
+        "critical_phase_risk"
+      ],
+      "properties": {
+        "minimum_balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "critical_phase_risk": {
+          "$ref": "#/$defs/ratio"
+        }
+      }
+    },
+    "observed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_yin_pressure",
+        "total_yang_pressure",
+        "balance_index"
+      ],
+      "properties": {
+        "total_yin_pressure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "total_yang_pressure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5
+        },
+        "balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "phase_assessments": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/phaseAssessment"
+      }
+    },
+    "overall_status": {
+      "enum": [
+        "balanced",
+        "yin_dominant",
+        "yang_dominant",
+        "unstable"
+      ]
+    },
+    "recommended_actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/recommendedAction"
+      }
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/reference"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "phaseAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "condition",
+        "severity",
+        "recommended_polarity",
+        "reason"
+      ],
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "condition": {
+          "enum": [
+            "balanced",
+            "yin_excess",
+            "yang_excess",
+            "high_risk"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "critical"
+          ]
+        },
+        "recommended_polarity": {
+          "enum": [
+            "yin",
+            "yang",
+            "hold"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "recommendedAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_type",
+        "target_phase",
+        "reason"
+      ],
+      "properties": {
+        "action_type": {
+          "enum": [
+            "reduce_load",
+            "increase_load",
+            "route_workload",
+            "hold_resources",
+            "release_resources",
+            "activate_cooling",
+            "activate_recovery",
+            "throttle_growth",
+            "stimulate_growth",
+            "review_state"
+          ]
+        },
+        "target_phase": {
+          "$ref": "#/$defs/phase"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
