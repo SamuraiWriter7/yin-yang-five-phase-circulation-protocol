@@ -1,0 +1,17 @@
+schema_version: "0.3.0"
+classification_id: residual-classification-thermal-001
+cycle_id: circulation-cycle-002
+observation_ref: residual-observation-thermal-001
+classification: recoverable
+confidence: 0.94
+classifier_ref: agent:residual-classifier-001
+reason_codes:
+  - known_secondary_use
+  - positive_recovery_potential
+candidate_target_phases:
+  - earth
+  - water
+  - wood
+classified_at: "2026-07-30T10:31:00+09:00"
+evidence_refs:
+  - assessment:heat-sink-availability-001
