@@ -1,0 +1,21 @@
+schema_version: 0.4.0
+resolution_id: rebalancing-conflict-resolution-overlap-001
+federation_id: federation-kazene-001
+plan_ref: federated-rebalancing-plan-001
+delegation_ref: governor-delegation-regional-001
+conflict_group_id: conflict-route-choice-001
+competing_transfer_refs:
+- transfer-compute-primary-001
+- transfer-compute-alternate-001
+resolution_method: priority_then_efficiency
+selected_transfer_refs:
+- transfer-compute-primary-001
+rejected_transfer_refs:
+- transfer-compute-primary-001
+- transfer-compute-alternate-001
+decision: resolved
+decided_by: agent:regional-circulation-governor-001
+decided_at: '2026-07-30T10:26:30+09:00'
+reason: The primary route provides the required capacity with lower latency.
+evidence_refs:
+- trace:route-comparison-001
