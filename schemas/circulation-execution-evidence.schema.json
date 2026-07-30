@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.5.0/circulation-execution-evidence.schema.json",
+  "title": "Circulation Execution Evidence",
+  "description": "Records execution evidence for a bound circulation operation and proves authorization consistency.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "execution_evidence_id",
+    "profile_ref",
+    "binding_ref",
+    "context",
+    "observed_operation_type",
+    "started_at",
+    "authorization_match",
+    "execution_status",
+    "trace_refs",
+    "outcome_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "execution_evidence_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "profile_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "binding_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_type",
+        "context_id"
+      ],
+      "properties": {
+        "context_type": {
+          "enum": [
+            "cycle",
+            "federation_epoch"
+          ]
+        },
+        "context_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "observed_operation_type": {
+      "enum": [
+        "phase_transition",
+        "residual_transformation",
+        "federated_rebalancing"
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authorization_match": {
+      "type": "boolean"
+    },
+    "execution_status": {
+      "enum": [
+        "completed",
+        "partial",
+        "failed",
+        "blocked"
+      ]
+    },
+    "trace_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "outcome_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "resource_usage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "resource_type",
+          "amount",
+          "unit"
+        ],
+        "properties": {
+          "resource_type": {
+            "$ref": "#/$defs/identifier"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  }
+}
