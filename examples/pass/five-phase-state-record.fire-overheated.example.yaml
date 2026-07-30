@@ -1,0 +1,59 @@
+schema_version: "0.1.0"
+record_id: five-phase-state-fire-overheated-001
+cycle_id: circulation-cycle-002
+observed_at: "2026-07-30T10:05:00+09:00"
+
+phase_states:
+  - phase: wood
+    polarity: yang
+    yin_pressure: 0.45
+    yang_pressure: 0.55
+    activity_level: 0.69
+    capacity_utilization: 0.63
+    risk_level: 0.25
+
+  - phase: fire
+    polarity: yang
+    yin_pressure: 0.25
+    yang_pressure: 0.95
+    activity_level: 0.96
+    capacity_utilization: 0.94
+    risk_level: 0.94
+    notes: Compute and thermal pressure exceed the critical operating range.
+
+  - phase: earth
+    polarity: yin
+    yin_pressure: 0.52
+    yang_pressure: 0.48
+    activity_level: 0.61
+    capacity_utilization: 0.67
+    risk_level: 0.36
+
+  - phase: metal
+    polarity: yang
+    yin_pressure: 0.42
+    yang_pressure: 0.58
+    activity_level: 0.73
+    capacity_utilization: 0.71
+    risk_level: 0.41
+
+  - phase: water
+    polarity: yang
+    yin_pressure: 0.46
+    yang_pressure: 0.54
+    activity_level: 0.82
+    capacity_utilization: 0.86
+    risk_level: 0.62
+    notes: Cooling and routing capacity are approaching saturation.
+
+aggregate:
+  total_yin_pressure: 2.10
+  total_yang_pressure: 3.10
+  balance_index: 1.476190
+
+status: unstable
+policy_ref: policy:five-phase-balance:v0.1
+
+evidence_refs:
+  - trace:cycle-002:thermal-window-001
+  - trace:cycle-002:compute-window-001
