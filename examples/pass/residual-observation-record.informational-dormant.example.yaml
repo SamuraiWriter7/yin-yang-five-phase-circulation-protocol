@@ -1,0 +1,18 @@
+schema_version: "0.3.0"
+observation_id: residual-observation-info-dormant-001
+cycle_id: circulation-cycle-002
+origin_ref: origin:failed-reasoning-run-001
+source_execution_ref: execution:reasoning-run-001
+source_phase: fire
+residual_type: informational
+observed_at: "2026-07-30T10:31:00+09:00"
+quantity:
+  value: 18
+  unit: trace-fragments
+containment_level: restricted
+content_fingerprint: sha256:dormant-trace-fragments-001
+
+description: Failure traces with no currently approved learning or audit use.
+
+evidence_refs:
+  - trace:failed-reasoning-context-001
