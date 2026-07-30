@@ -1,4 +1,4 @@
-schema_version: "0.2.0"
+schema_version: "0.1.0"
 assessment_id: yin-yang-assessment-balanced-001
 cycle_id: circulation-cycle-001
 state_record_ref: five-phase-state-balanced-001
