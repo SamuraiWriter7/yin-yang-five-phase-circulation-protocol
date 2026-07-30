@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.1.0/polarity-shift-receipt.schema.json",
+  "title": "Polarity Shift Receipt",
+  "description": "Records an authorized Yin-to-Yang or Yang-to-Yin operating shift for one of the five phases.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "shift_id",
+    "cycle_id",
+    "state_record_ref",
+    "assessment_ref",
+    "phase",
+    "previous_polarity",
+    "new_polarity",
+    "reason_code",
+    "triggers",
+    "actions",
+    "authorization",
+    "requested_at",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "shift_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cycle_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "state_record_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "assessment_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "previous_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "new_polarity": {
+      "$ref": "#/$defs/polarity"
+    },
+    "reason_code": {
+      "enum": [
+        "overheat",
+        "underutilization",
+        "congestion",
+        "uncertainty",
+        "capacity_recovery",
+        "liquidity_excess",
+        "liquidity_shortage",
+        "storage_pressure",
+        "governance_review",
+        "manual_override"
+      ]
+    },
+    "triggers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/trigger"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "authorization": {
+      "$ref": "#/$defs/authorization"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "$ref": "#/$defs/result"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": [
+        "wood",
+        "fire",
+        "earth",
+        "metal",
+        "water"
+      ]
+    },
+    "polarity": {
+      "enum": [
+        "yin",
+        "yang"
+      ]
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric",
+        "observed_value",
+        "comparator",
+        "threshold"
+      ],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "observed_value": {
+          "type": "number"
+        },
+        "comparator": {
+          "enum": [
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "eq"
+          ]
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 80
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_type"
+      ],
+      "properties": {
+        "action_type": {
+          "enum": [
+            "reduce_load",
+            "increase_load",
+            "route_workload",
+            "hold_resources",
+            "release_resources",
+            "activate_cooling",
+            "activate_recovery",
+            "throttle_growth",
+            "stimulate_growth",
+            "quarantine_residual",
+            "review_dormant_residual"
+          ]
+        },
+        "target_ref": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "policy_ref",
+        "decided_at"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "authorized",
+            "denied",
+            "human_review_required"
+          ]
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "authorized_by": {
+          "$ref": "#/$defs/reference"
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "applied",
+            "stabilized",
+            "failed",
+            "reverted"
+          ]
+        },
+        "observed_balance_index": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        }
+      }
+    }
+  }
+}
