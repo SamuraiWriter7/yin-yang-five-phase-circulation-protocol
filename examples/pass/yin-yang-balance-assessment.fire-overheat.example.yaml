@@ -1,0 +1,63 @@
+schema_version: "0.1.0"
+assessment_id: yin-yang-assessment-fire-overheat-001
+cycle_id: circulation-cycle-002
+state_record_ref: five-phase-state-fire-overheated-001
+assessed_at: "2026-07-30T10:06:00+09:00"
+
+thresholds:
+  minimum_balance_index: 0.80
+  maximum_balance_index: 1.20
+  critical_phase_risk: 0.90
+
+observed:
+  total_yin_pressure: 2.10
+  total_yang_pressure: 3.10
+  balance_index: 1.476190
+
+phase_assessments:
+  - phase: wood
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Growth remains within the current onboarding and capacity limits.
+
+  - phase: fire
+    condition: high_risk
+    severity: critical
+    recommended_polarity: yin
+    reason: Compute utilization and thermal pressure exceed critical limits.
+
+  - phase: earth
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Trace storage remains available for the current cycle.
+
+  - phase: metal
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Authorization and valuation throughput remain operational.
+
+  - phase: water
+    condition: yang_excess
+    severity: warning
+    recommended_polarity: yin
+    reason: Cooling and routing flow should be retained for emergency capacity.
+
+overall_status: unstable
+
+recommended_actions:
+  - action_type: reduce_load
+    target_phase: fire
+    reason: Suspend low-priority inference until thermal pressure falls.
+
+  - action_type: activate_cooling
+    target_phase: water
+    reason: Increase cooling allocation and route heat toward recovery sinks.
+
+  - action_type: route_workload
+    target_phase: water
+    reason: Move eligible workloads to cooler distributed nodes.
+
+policy_ref: policy:five-phase-balance:v0.1
