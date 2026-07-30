@@ -1,0 +1,35 @@
+schema_version: "0.2.0"
+evaluation_id: phase-transition-evaluation-water-fire-001
+cycle_id: circulation-cycle-002
+state_record_ref: five-phase-state-fire-overheated-001
+assessment_ref: yin-yang-assessment-fire-overheat-001
+policy_ref: five-phase-transition-policy-canonical-001
+
+source_phase: water
+target_phase: fire
+source_polarity: yang
+target_polarity: yin
+relation_type: controlling
+
+trigger_code: overheat_control
+emergency: false
+
+timing:
+  last_transition_at: "2026-07-30T09:59:00+09:00"
+  requested_at: "2026-07-30T10:20:00+09:00"
+  elapsed_seconds: 1260
+  required_cooldown_seconds: 300
+  cooldown_satisfied: true
+
+decision: allowed
+
+reason_codes:
+  - canonical_controlling_relation
+  - cooldown_satisfied
+  - state_reference_valid
+  - assessment_reference_valid
+
+evaluated_at: "2026-07-30T10:20:10+09:00"
+
+evidence_refs:
+  - trace:cycle-002:thermal-window-001
