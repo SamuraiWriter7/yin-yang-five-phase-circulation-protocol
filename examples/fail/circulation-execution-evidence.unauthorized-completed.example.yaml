@@ -1,0 +1,24 @@
+schema_version: 0.5.0
+execution_evidence_id: circulation-execution-evidence-unauthorized-001
+profile_ref: civilization-os-interoperability-profile-canonical-001
+binding_ref: circulation-operation-binding-federated-001
+context:
+  context_type: federation_epoch
+  context_id: federation-epoch-20260730-01
+observed_operation_type: federated_rebalancing
+started_at: '2026-07-30T10:26:45+09:00'
+completed_at: '2026-07-30T10:28:00+09:00'
+authorization_match: false
+execution_status: completed
+trace_refs:
+- trace:compute-transfer-001
+- trace:cooling-transfer-001
+outcome_refs:
+- trace:federated-rebalance-result-001
+resource_usage:
+- resource_type: compute_capacity
+  amount: 0.35
+  unit: normalized_capacity
+- resource_type: cooling_capacity
+  amount: 0.05
+  unit: normalized_capacity
