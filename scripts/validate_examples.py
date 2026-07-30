@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Yin-Yang Five-Phase Circulation Protocol v0.4 examples."""
+"""Validate Yin-Yang Five-Phase Circulation Protocol v0.5 examples."""
 
 from __future__ import annotations
 
@@ -70,6 +70,24 @@ SCHEMA_FILES = {
     ),
     "federated-rebalancing-receipt": (
         SCHEMA_DIR / "federated-rebalancing-receipt.schema.json"
+    ),
+    "civilization-os-interoperability-profile": (
+        SCHEMA_DIR / "civilization-os-interoperability-profile.schema.json"
+    ),
+    "circulation-operation-binding": (
+        SCHEMA_DIR / "circulation-operation-binding.schema.json"
+    ),
+    "circulation-execution-evidence": (
+        SCHEMA_DIR / "circulation-execution-evidence.schema.json"
+    ),
+    "circulation-audit-record": (
+        SCHEMA_DIR / "circulation-audit-record.schema.json"
+    ),
+    "circulation-royalty-settlement-receipt": (
+        SCHEMA_DIR / "circulation-royalty-settlement-receipt.schema.json"
+    ),
+    "civilization-os-conformance-assessment": (
+        SCHEMA_DIR / "civilization-os-conformance-assessment.schema.json"
     ),
 }
 
@@ -1311,6 +1329,284 @@ def validate_federated_rebalancing_receipt(
 
     registry[data["receipt_id"]] = data
 
+
+CANONICAL_INTEROPERABILITY_STAGES = {
+    "origin", "trace", "authorization", "execution", "audit", "royalty"
+}
+CANONICAL_INTEROPERABILITY_SEQUENCE = {
+    ("origin", "trace"),
+    ("trace", "authorization"),
+    ("authorization", "execution"),
+    ("execution", "audit"),
+    ("audit", "royalty"),
+}
+
+
+def infer_operation_type(record: dict[str, Any]) -> str | None:
+    if "transition_id" in record:
+        return "phase_transition"
+    if "transformation_id" in record:
+        return "residual_transformation"
+    if "receipt_id" in record and "federation_id" in record:
+        return "federated_rebalancing"
+    return None
+
+
+def local_context(record: dict[str, Any], operation_type: str) -> tuple[str, str]:
+    if operation_type in {"phase_transition", "residual_transformation"}:
+        return "cycle", record["cycle_id"]
+    if operation_type == "federated_rebalancing":
+        return "federation_epoch", record["epoch_id"]
+    raise SemanticError(f"unsupported operation_type: {operation_type}")
+
+
+def validate_interoperability_profile(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    stages = data["required_stages"]
+    if set(stages) != CANONICAL_INTEROPERABILITY_STAGES or len(stages) != len(set(stages)):
+        raise SemanticError(
+            "required_stages must contain origin, trace, authorization, execution, audit, and royalty exactly once"
+        )
+
+    bound_stages = [item["stage"] for item in data["stage_bindings"]]
+    if set(bound_stages) != CANONICAL_INTEROPERABILITY_STAGES or len(bound_stages) != len(set(bound_stages)):
+        raise SemanticError("stage_bindings must bind every required stage exactly once")
+
+    sequence = {
+        (item["predecessor"], item["successor"])
+        for item in data["sequence_constraints"]
+    }
+    if sequence != CANONICAL_INTEROPERABILITY_SEQUENCE:
+        missing = sorted(CANONICAL_INTEROPERABILITY_SEQUENCE - sequence)
+        extra = sorted(sequence - CANONICAL_INTEROPERABILITY_SEQUENCE)
+        raise SemanticError(
+            f"sequence_constraints must match the canonical Origin-to-Royalty order; missing={missing}, extra={extra}"
+        )
+
+    registry[data["profile_id"]] = data
+
+
+def validate_circulation_operation_binding(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    profile = resolve_record(registry, data["profile_ref"], "profile_ref")
+    if profile["status"] != "active":
+        raise SemanticError("operation binding requires an active interoperability profile")
+
+    local = resolve_record(registry, data["local_record_ref"], "local_record_ref")
+    inferred = infer_operation_type(local)
+    if inferred != data["operation_type"]:
+        raise SemanticError(
+            f"operation_type must be '{inferred}' for the referenced local record"
+        )
+
+    expected_context_type, expected_context_id = local_context(local, inferred)
+    if data["context"]["context_type"] != expected_context_type:
+        raise SemanticError(f"context_type must be '{expected_context_type}'")
+    if data["context"]["context_id"] != expected_context_id:
+        raise SemanticError("context_id must match the referenced local record")
+
+    local_auth = local.get("authorization", {})
+    local_decision = local_auth.get("decision")
+    if local_decision and data["authorization"]["decision"] != local_decision:
+        raise SemanticError("authorization decision must match the local operation")
+    local_auth_ref = local_auth.get("authorization_ref")
+    if local_auth_ref and data["authorization"]["receipt_ref"] != local_auth_ref:
+        raise SemanticError("authorization receipt_ref must match the local operation")
+
+    result_status = local.get("result", {}).get("status")
+    if result_status in {"applied", "completed", "partial", "stabilized"}:
+        if data["authorization"]["decision"] != "authorized":
+            raise SemanticError("completed or applied operation requires authorized binding")
+        if not data["authorization"]["scope_match"]:
+            raise SemanticError("completed or applied operation requires scope_match=true")
+
+    registry[data["binding_id"]] = data
+
+
+def validate_circulation_execution_evidence(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    profile = resolve_record(registry, data["profile_ref"], "profile_ref")
+    binding = resolve_record(registry, data["binding_ref"], "binding_ref")
+    if binding["profile_ref"] != data["profile_ref"]:
+        raise SemanticError("profile_ref must match the operation binding")
+    if profile["status"] != "active":
+        raise SemanticError("execution evidence requires an active profile")
+    if data["context"] != binding["context"]:
+        raise SemanticError("execution context must match the operation binding")
+    if data["observed_operation_type"] != binding["operation_type"]:
+        raise SemanticError("observed_operation_type must match the operation binding")
+
+    status = data["execution_status"]
+    if status in {"completed", "partial"}:
+        if not data["authorization_match"]:
+            raise SemanticError("completed or partial execution requires authorization_match=true")
+        if binding["authorization"]["decision"] != "authorized":
+            raise SemanticError("completed or partial execution requires an authorized binding")
+        if "completed_at" not in data:
+            raise SemanticError("completed or partial execution requires completed_at")
+        if not data["outcome_refs"]:
+            raise SemanticError("completed or partial execution requires outcome_refs")
+    if "completed_at" in data and parse_dt(data["completed_at"]) < parse_dt(data["started_at"]):
+        raise SemanticError("completed_at cannot be earlier than started_at")
+
+    registry[data["execution_evidence_id"]] = data
+
+
+def validate_circulation_audit_record(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    binding = resolve_record(registry, data["binding_ref"], "binding_ref")
+    execution = resolve_record(
+        registry, data["execution_evidence_ref"], "execution_evidence_ref"
+    )
+    if binding["profile_ref"] != data["profile_ref"]:
+        raise SemanticError("profile_ref must match the operation binding")
+    if execution["profile_ref"] != data["profile_ref"]:
+        raise SemanticError("profile_ref must match execution evidence")
+    if execution["binding_ref"] != data["binding_ref"]:
+        raise SemanticError("execution evidence must reference the same binding")
+
+    checks = data["checks"]
+    all_checks = all(bool(value) for value in checks.values())
+    findings = data["unresolved_findings"]
+    decision = data["decision"]
+
+    if decision == "pass":
+        if not all_checks:
+            raise SemanticError("pass audit requires every check to be true")
+        if findings:
+            raise SemanticError("pass audit cannot contain unresolved findings")
+        if execution["execution_status"] not in {"completed", "partial"}:
+            raise SemanticError("pass audit requires completed or partial execution")
+    elif decision == "fail":
+        if all_checks and not findings:
+            raise SemanticError("fail audit requires a failed check or unresolved finding")
+        if checks["royalty_eligible"]:
+            raise SemanticError("failed audit cannot be royalty_eligible")
+    else:
+        if not findings:
+            raise SemanticError("human review audit requires an unresolved finding")
+        if checks["royalty_eligible"]:
+            raise SemanticError("human review audit cannot be royalty_eligible")
+
+    registry[data["audit_id"]] = data
+
+
+def validate_circulation_royalty_settlement(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    binding = resolve_record(registry, data["binding_ref"], "binding_ref")
+    audit = resolve_record(registry, data["audit_ref"], "audit_ref")
+    if binding["profile_ref"] != data["profile_ref"]:
+        raise SemanticError("profile_ref must match the operation binding")
+    if audit["profile_ref"] != data["profile_ref"]:
+        raise SemanticError("profile_ref must match the audit")
+    if audit["binding_ref"] != data["binding_ref"]:
+        raise SemanticError("audit_ref must audit the same operation binding")
+    if data["context"] != binding["context"]:
+        raise SemanticError("settlement context must match the operation binding")
+
+    status = data["settlement_status"]
+    allocations = data["allocations"]
+    gross = float(data["value"]["gross_amount"])
+    share_total = sum(float(item["share_ratio"]) for item in allocations)
+    amount_total = sum(float(item["amount"]) for item in allocations)
+
+    if status in {"settled", "held"}:
+        if not allocations:
+            raise SemanticError(f"{status} settlement requires allocations")
+        require_close(share_total, 1.0, "allocation share ratios")
+        require_close(amount_total, gross, "allocation amounts")
+
+    if status == "settled":
+        if audit["decision"] != "pass" or not audit["checks"]["royalty_eligible"]:
+            raise SemanticError("settled receipt requires a passing royalty-eligible audit")
+        if data["unresolved_dispute_refs"]:
+            raise SemanticError("settled receipt cannot contain unresolved disputes")
+        if "settled_at" not in data or "ledger_ref" not in data:
+            raise SemanticError("settled receipt requires settled_at and ledger_ref")
+    elif status == "held":
+        if not data["unresolved_dispute_refs"] and audit["decision"] == "pass":
+            raise SemanticError("held receipt requires a dispute or non-passing audit")
+        if "settled_at" in data:
+            raise SemanticError("held receipt cannot include settled_at")
+    else:
+        if allocations:
+            raise SemanticError("rejected receipt cannot include allocations")
+        if "settled_at" in data:
+            raise SemanticError("rejected receipt cannot include settled_at")
+
+    if "value_attribution_ref" in data:
+        attribution = resolve_record(
+            registry, data["value_attribution_ref"], "value_attribution_ref"
+        )
+        if binding["operation_type"] != "residual_transformation":
+            raise SemanticError("value_attribution_ref is only valid for residual transformation")
+        if attribution.get("cycle_id") != binding["context"]["context_id"]:
+            raise SemanticError("value attribution cycle must match the binding context")
+
+    registry[data["settlement_id"]] = data
+
+
+def validate_civilization_os_conformance(
+    data: dict[str, Any], registry: dict[str, dict[str, Any]]
+) -> None:
+    profile = resolve_record(registry, data["profile_ref"], "profile_ref")
+    binding = resolve_record(registry, data["binding_ref"], "binding_ref")
+    execution = resolve_record(
+        registry, data["execution_evidence_ref"], "execution_evidence_ref"
+    )
+    audit = resolve_record(registry, data["audit_ref"], "audit_ref")
+    settlement = resolve_record(registry, data["settlement_ref"], "settlement_ref")
+
+    if binding["profile_ref"] != data["profile_ref"] or profile["status"] != "active":
+        raise SemanticError("conformance assessment requires the same active profile")
+    if execution["binding_ref"] != data["binding_ref"]:
+        raise SemanticError("execution_evidence_ref must use the same binding")
+    if audit["binding_ref"] != data["binding_ref"] or audit["execution_evidence_ref"] != data["execution_evidence_ref"]:
+        raise SemanticError("audit_ref must audit the same binding and execution")
+    if settlement["binding_ref"] != data["binding_ref"] or settlement["audit_ref"] != data["audit_ref"]:
+        raise SemanticError("settlement_ref must use the same binding and audit")
+
+    stage_items = data["checked_stages"]
+    stages = [item["stage"] for item in stage_items]
+    if set(stages) != CANONICAL_INTEROPERABILITY_STAGES or len(stages) != len(set(stages)):
+        raise SemanticError("checked_stages must contain every stage exactly once")
+    by_stage = {item["stage"]: item for item in stage_items}
+    expected_refs = {
+        "origin": binding["origin_ref"],
+        "trace": binding["trace_ref"],
+        "authorization": binding["authorization"]["receipt_ref"],
+        "execution": data["execution_evidence_ref"],
+        "audit": data["audit_ref"],
+        "royalty": data["settlement_ref"],
+    }
+    for stage, expected_ref in expected_refs.items():
+        if by_stage[stage]["record_ref"] != expected_ref:
+            raise SemanticError(f"{stage} record_ref does not match the bound chain")
+
+    statuses = [item["status"] for item in stage_items]
+    if data["overall_status"] == "conformant":
+        if any(status != "conformant" for status in statuses):
+            raise SemanticError("conformant assessment requires every stage to be conformant")
+        if data["findings"]:
+            raise SemanticError("conformant assessment cannot contain findings")
+        if audit["decision"] != "pass" or settlement["settlement_status"] != "settled":
+            raise SemanticError("conformant assessment requires passed audit and settled royalty")
+    elif data["overall_status"] == "nonconformant":
+        if all(status == "conformant" for status in statuses):
+            raise SemanticError("nonconformant assessment requires a missing or invalid stage")
+        if not data["findings"]:
+            raise SemanticError("nonconformant assessment requires findings")
+    else:
+        if not data["findings"]:
+            raise SemanticError("human review assessment requires findings")
+
+    registry[data["conformance_id"]] = data
+
 SEMANTIC_VALIDATORS: dict[
     str,
     Callable[[dict[str, Any], dict[str, dict[str, Any]]], None],
@@ -1336,6 +1632,22 @@ SEMANTIC_VALIDATORS: dict[
     ),
     "federated-rebalancing-receipt": (
         validate_federated_rebalancing_receipt
+    ),
+    "civilization-os-interoperability-profile": (
+        validate_interoperability_profile
+    ),
+    "circulation-operation-binding": (
+        validate_circulation_operation_binding
+    ),
+    "circulation-execution-evidence": (
+        validate_circulation_execution_evidence
+    ),
+    "circulation-audit-record": validate_circulation_audit_record,
+    "circulation-royalty-settlement-receipt": (
+        validate_circulation_royalty_settlement
+    ),
+    "civilization-os-conformance-assessment": (
+        validate_civilization_os_conformance
     ),
 }
 
@@ -1407,7 +1719,7 @@ def validate_fail_examples(
 
 
 def main() -> int:
-    print("=== Yin-Yang Five-Phase Circulation Protocol v0.4 Validation ===")
+    print("=== Yin-Yang Five-Phase Circulation Protocol v0.5 Validation ===")
     validators: dict[str, Draft202012Validator] = {}
     for kind, schema_path in SCHEMA_FILES.items():
         schema = load_schema(schema_path)
