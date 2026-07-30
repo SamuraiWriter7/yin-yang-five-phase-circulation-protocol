@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.4.0/rebalancing-conflict-resolution.schema.json",
+  "title": "Rebalancing Conflict Resolution",
+  "description": "Resolves mutually exclusive transfer candidates under delegated authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "resolution_id",
+    "federation_id",
+    "plan_ref",
+    "delegation_ref",
+    "conflict_group_id",
+    "competing_transfer_refs",
+    "resolution_method",
+    "selected_transfer_refs",
+    "rejected_transfer_refs",
+    "decision",
+    "decided_by",
+    "decided_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0"
+    },
+    "resolution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "federation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "delegation_ref": {
+      "$ref": "#/$defs/reference"
+    },
+    "conflict_group_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "competing_transfer_refs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "resolution_method": {
+      "enum": [
+        "priority_then_efficiency",
+        "risk_minimization",
+        "fair_share",
+        "human_decision",
+        "emergency_override"
+      ]
+    },
+    "selected_transfer_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "rejected_transfer_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "decision": {
+      "enum": [
+        "resolved",
+        "human_review_required",
+        "unresolved"
+      ]
+    },
+    "decided_by": {
+      "$ref": "#/$defs/reference"
+    },
+    "decided_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
