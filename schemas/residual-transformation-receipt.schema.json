@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kazene.org/schemas/yin-yang-five-phase-circulation-protocol/0.3.0/residual-transformation-receipt.schema.json",
+  "title": "Residual Transformation Receipt",
+  "description": "Records authorized transformation of a recoverable residual into one or more secondary resources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transformation_id",
+    "cycle_id",
+    "observation_ref",
+    "classification_ref",
+    "recovery_assessment_ref",
+    "phase_route",
+    "authorization",
+    "started_at",
+    "value_accounting",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.3.0"},
+    "transformation_id": {"$ref": "#/$defs/identifier"},
+    "cycle_id": {"$ref": "#/$defs/identifier"},
+    "observation_ref": {"$ref": "#/$defs/reference"},
+    "classification_ref": {"$ref": "#/$defs/reference"},
+    "recovery_assessment_ref": {"$ref": "#/$defs/reference"},
+    "phase_route": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/phase"}
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "policy_ref", "decided_at"],
+      "properties": {
+        "decision": {
+          "enum": ["authorized", "denied", "human_review_required"]
+        },
+        "policy_ref": {"$ref": "#/$defs/reference"},
+        "authorized_by": {"$ref": "#/$defs/reference"},
+        "decided_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": "string", "format": "date-time"},
+    "output_resources": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/outputResource"}
+    },
+    "value_accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_equivalent_value",
+        "output_equivalent_value",
+        "conversion_loss_value",
+        "unallocated_value",
+        "unit"
+      ],
+      "properties": {
+        "input_equivalent_value": {"type": "number", "minimum": 0},
+        "output_equivalent_value": {"type": "number", "minimum": 0},
+        "conversion_loss_value": {"type": "number", "minimum": 0},
+        "unallocated_value": {"type": "number", "minimum": 0},
+        "unit": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["pending", "completed", "partial", "failed", "reverted"]
+        },
+        "failure_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reference"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "phase": {
+      "enum": ["wood", "fire", "earth", "metal", "water"]
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "outputResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "resource_type",
+        "target_phase",
+        "quantity"
+      ],
+      "properties": {
+        "resource_id": {"$ref": "#/$defs/identifier"},
+        "resource_type": {
+          "enum": [
+            "usable_heat",
+            "compute_capacity",
+            "maintenance_window",
+            "control_knowledge",
+            "circulation_fund"
+          ]
+        },
+        "target_phase": {"$ref": "#/$defs/phase"},
+        "quantity": {"$ref": "#/$defs/quantity"},
+        "beneficiary_ref": {"$ref": "#/$defs/reference"}
+      }
+    }
+  }
+}
