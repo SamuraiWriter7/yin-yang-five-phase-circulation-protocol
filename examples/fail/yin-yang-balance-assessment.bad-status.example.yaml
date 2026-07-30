@@ -1,0 +1,49 @@
+schema_version: "0.1.0"
+assessment_id: yin-yang-assessment-bad-status-001
+cycle_id: circulation-cycle-fail-002
+state_record_ref: five-phase-state-missing-001
+assessed_at: "2026-07-30T10:11:00+09:00"
+
+thresholds:
+  minimum_balance_index: 0.80
+  maximum_balance_index: 1.20
+  critical_phase_risk: 0.90
+
+observed:
+  total_yin_pressure: 2.50
+  total_yang_pressure: 2.50
+  balance_index: 1.00
+
+phase_assessments:
+  - phase: wood
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Balanced.
+
+  - phase: fire
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Balanced.
+
+  - phase: earth
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Balanced.
+
+  - phase: metal
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Balanced.
+
+  - phase: water
+    condition: balanced
+    severity: info
+    recommended_polarity: hold
+    reason: Balanced.
+
+overall_status: yang_dominant
+recommended_actions: []
