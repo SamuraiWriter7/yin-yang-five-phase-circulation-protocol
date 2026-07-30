@@ -1,0 +1,26 @@
+schema_version: "0.2.0"
+transition_id: phase-transition-water-wood-001
+cycle_id: circulation-cycle-001
+evaluation_ref: phase-transition-evaluation-water-wood-001
+policy_ref: five-phase-transition-policy-canonical-001
+
+source_phase: water
+target_phase: wood
+source_polarity: yin
+target_polarity: yang
+relation_type: generating
+
+authorization:
+  decision: authorized
+  policy_ref: five-phase-transition-policy-canonical-001
+  authorized_by: agent:circulation-governor-001
+  decided_at: "2026-07-30T10:20:15+09:00"
+
+requested_at: "2026-07-30T10:20:00+09:00"
+effective_at: "2026-07-30T10:20:20+09:00"
+
+result:
+  status: completed
+  post_state_record_ref: five-phase-state-balanced-001
+  evidence_refs:
+    - trace:wood-activation-window-001
