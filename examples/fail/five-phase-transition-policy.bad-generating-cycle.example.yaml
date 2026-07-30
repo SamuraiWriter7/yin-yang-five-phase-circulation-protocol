@@ -1,0 +1,51 @@
+schema_version: "0.2.0"
+policy_id: five-phase-transition-policy-invalid-001
+policy_version: "0.2.0"
+issued_at: "2026-07-30T10:15:00+09:00"
+
+generating_cycle:
+  - source_phase: wood
+    target_phase: fire
+
+  - source_phase: fire
+    target_phase: earth
+
+  - source_phase: earth
+    target_phase: metal
+
+  - source_phase: metal
+    target_phase: water
+
+  - source_phase: water
+    target_phase: fire
+
+controlling_cycle:
+  - source_phase: wood
+    target_phase: earth
+
+  - source_phase: earth
+    target_phase: water
+
+  - source_phase: water
+    target_phase: fire
+
+  - source_phase: fire
+    target_phase: metal
+
+  - source_phase: metal
+    target_phase: wood
+
+blocked_transitions:
+  - source_phase: fire
+    target_phase: water
+    reason: Direct reverse-control routing may amplify thermal instability.
+
+human_review_transitions:
+  - source_phase: metal
+    target_phase: wood
+    reason: Automated pruning requires governance review.
+
+cooldown_policy:
+  generating_default_seconds: 900
+  controlling_default_seconds: 300
+  emergency_bypass_allowed: true
