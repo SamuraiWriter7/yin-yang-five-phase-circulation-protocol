@@ -1,0 +1,32 @@
+schema_version: "0.1.0"
+shift_id: polarity-shift-invalid-001
+cycle_id: circulation-cycle-002
+state_record_ref: five-phase-state-fire-overheated-001
+assessment_ref: yin-yang-assessment-fire-overheat-001
+
+phase: fire
+previous_polarity: yang
+new_polarity: yang
+reason_code: overheat
+
+triggers:
+  - metric: compute_utilization
+    observed_value: 0.94
+    comparator: gte
+    threshold: 0.90
+    unit: ratio
+
+actions:
+  - action_type: reduce_load
+
+authorization:
+  decision: authorized
+  policy_ref: policy:five-phase-balance:v0.1
+  authorized_by: agent:circulation-governor-001
+  decided_at: "2026-07-30T10:12:00+09:00"
+
+requested_at: "2026-07-30T10:11:30+09:00"
+effective_at: "2026-07-30T10:12:10+09:00"
+
+result:
+  status: applied
