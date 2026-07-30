@@ -1,0 +1,61 @@
+schema_version: "0.1.0"
+record_id: five-phase-state-balanced-001
+cycle_id: circulation-cycle-001
+observed_at: "2026-07-30T10:00:00+09:00"
+
+phase_states:
+  - phase: wood
+    polarity: yang
+    yin_pressure: 0.48
+    yang_pressure: 0.52
+    activity_level: 0.58
+    capacity_utilization: 0.54
+    risk_level: 0.18
+    notes: Controlled node growth with available onboarding capacity.
+
+  - phase: fire
+    polarity: yin
+    yin_pressure: 0.62
+    yang_pressure: 0.38
+    activity_level: 0.66
+    capacity_utilization: 0.64
+    risk_level: 0.32
+    notes: Compute load is being moderated after a demand peak.
+
+  - phase: earth
+    polarity: yin
+    yin_pressure: 0.55
+    yang_pressure: 0.45
+    activity_level: 0.47
+    capacity_utilization: 0.59
+    risk_level: 0.21
+    notes: Trace retention and compaction are operating normally.
+
+  - phase: metal
+    polarity: yang
+    yin_pressure: 0.44
+    yang_pressure: 0.56
+    activity_level: 0.53
+    capacity_utilization: 0.49
+    risk_level: 0.24
+    notes: Valuation, authorization, and settlement remain responsive.
+
+  - phase: water
+    polarity: yin
+    yin_pressure: 0.51
+    yang_pressure: 0.49
+    activity_level: 0.45
+    capacity_utilization: 0.51
+    risk_level: 0.17
+    notes: Cooling and value flow retain sufficient reserve.
+
+aggregate:
+  total_yin_pressure: 2.60
+  total_yang_pressure: 2.40
+  balance_index: 0.923077
+
+status: balanced
+policy_ref: policy:five-phase-balance:v0.1
+
+evidence_refs:
+  - trace:cycle-001:metrics-window-001
